@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -55,7 +55,7 @@ class SimulationRun(StrictModel):
     experiment: ExperimentManifest
     backend: Literal["surrogate", "discrete_event", "isaac_sim_import"]
     metrics: ScenarioMetrics
-    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     status: Literal["completed", "failed"] = "completed"
     notes: list[str] = Field(default_factory=list)
 

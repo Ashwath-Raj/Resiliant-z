@@ -8,7 +8,6 @@ import numpy as np
 
 from resiliant_z.models import DiscoveryDecision, SimulationRun
 
-
 DEMAND_SPLIT = 0.80
 PRIORITY_SPLIT = 0.30
 

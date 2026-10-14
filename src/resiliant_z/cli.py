@@ -13,8 +13,8 @@ import httpx
 from dotenv import load_dotenv
 
 from resiliant_z import __version__
-from resiliant_z.llm.nebius import DEFAULT_BASE_URL, nebius_is_configured
 from resiliant_z.fleet_pipeline import run_fleet_demo
+from resiliant_z.llm.nebius import DEFAULT_BASE_URL, nebius_is_configured
 from resiliant_z.pipeline import run_demo
 from resiliant_z.simulation.isaac_csv import import_isaac_metrics_csv
 
@@ -54,9 +54,6 @@ def _doctor() -> int:
     print(f"Model ID set: {'yes' if os.getenv('NEBIUS_MODEL', '').strip() else 'no'}")
     print("Secret values are intentionally not printed.")
     print("Isaac Sim: not checked or launched by this command; run it on a compatible host.")
-    if sys.version_info < (3, 11):
-        print("ERROR: Python 3.11 or newer is required.")
-        return 1
     print("Local runtime check passed.")
     return 0
 

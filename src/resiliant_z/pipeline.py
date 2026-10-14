@@ -8,7 +8,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
-
 from resiliant_z.evidence.analyzer import analyze_discovery
 from resiliant_z.experiments.planner import factorial_manifests, replay_manifests
 from resiliant_z.llm.nebius import (
@@ -62,7 +61,6 @@ def _mean(runs: list[SimulationRun], key: str) -> float:
 
 
 def _build_report(summary: dict, decision: DiscoveryDecision) -> str:
-    discovery = summary["discovery"]
     replay = summary["policy_replay"]
     llm = summary["hypothesis_generation"]
     lines = [

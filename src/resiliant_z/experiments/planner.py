@@ -10,7 +10,6 @@ from collections.abc import Iterable
 from resiliant_z.models import ExperimentManifest, ExperimentParameters
 from resiliant_z.simulation.surrogate import current_git_sha
 
-
 DEMAND_LEVELS = (0.55, 1.05)
 PRIORITY_LEVELS = (0.15, 0.50)
 
