@@ -39,13 +39,26 @@ class ExperimentManifest(StrictModel):
 
 
 class ScenarioMetrics(StrictModel):
-    """Measured outputs. They are metrics, not claims about real hardware."""
+    """Measured outputs. They are metrics, not claims about real hardware.
+
+    ``average_wait_seconds`` in the discrete-event backend is the mean delay from
+    task arrival until route-service start among tasks that actually started
+    route service before the observation horizon. Unstarted tasks are right-censored
+    and must be reported separately; they must not be silently counted as completed
+    waits.
+    """
 
     throughput_tasks_per_min: float = Field(ge=0)
     average_wait_seconds: float = Field(ge=0)
     queue_growth_per_min: float = Field(ge=0)
     junction_occupancy: float = Field(ge=0, le=1)
     deadlock_events: int = Field(ge=0)
+    task_arrivals: int | None = Field(default=None, ge=0)
+    task_completions: int | None = Field(default=None, ge=0)
+    route_service_started_count: int | None = Field(default=None, ge=0)
+    tasks_not_started_by_horizon: int | None = Field(default=None, ge=0)
+    route_service_wait_total_seconds: float | None = Field(default=None, ge=0)
+    censored_wait_observation_seconds: float | None = Field(default=None, ge=0)
 
 
 class SimulationRun(StrictModel):

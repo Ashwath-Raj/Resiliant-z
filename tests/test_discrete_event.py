@@ -37,3 +37,37 @@ def test_low_demand_has_less_junction_pressure_than_high_priority_overload():
     mean_high_wait = sum(r.metrics.average_wait_seconds for r in high_runs) / len(high_runs)
     assert mean_high_occ > mean_low_occ
     assert mean_high_wait > mean_low_wait
+
+
+def test_wait_metrics_separate_started_tasks_from_right_censored_tasks():
+    manifest = ExperimentManifest(
+        experiment_id="DES-CENSORING",
+        stage="replay",
+        seed=13579,
+        parameters=ExperimentParameters(
+            traffic_demand=1.05,
+            priority_ratio=0.50,
+            bypass_ratio=0.0,
+        ),
+    )
+    result = DiscreteEventFleetSimulator().run(manifest)
+    metrics = result.metrics
+
+    assert metrics.task_arrivals is not None
+    assert metrics.task_completions is not None
+    assert metrics.route_service_started_count is not None
+    assert metrics.tasks_not_started_by_horizon is not None
+    assert metrics.route_service_wait_total_seconds is not None
+    assert metrics.censored_wait_observation_seconds is not None
+    assert metrics.task_arrivals == (
+        metrics.route_service_started_count + metrics.tasks_not_started_by_horizon
+    )
+    assert metrics.task_completions <= metrics.route_service_started_count
+    if metrics.route_service_started_count:
+        expected_mean = (
+            metrics.route_service_wait_total_seconds / metrics.route_service_started_count
+        )
+        assert abs(metrics.average_wait_seconds - expected_mean) < 1e-5
+    else:
+        assert metrics.average_wait_seconds == 0.0
+    assert any("right-censored" in note for note in result.notes)

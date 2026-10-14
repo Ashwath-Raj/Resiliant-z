@@ -188,11 +188,28 @@ class DiscreteEventFleetSimulator:
 
         elapsed_minutes = self.duration_seconds / 60.0
         outstanding = max(0, arrivals - completions)
-        waits = [
+        # Only tasks that actually reached route-service start have an observed
+        # wait-to-start duration. Do not replace missing waits with the remaining
+        # simulation horizon and then call the mixture an average wait; those tasks
+        # are right-censored. Preserve that separate horizon-limited exposure metric
+        # so reports can show both the started-task wait and censoring burden.
+        route_service_started_count = len(service_waits)
+        tasks_not_started_by_horizon = max(0, arrivals - route_service_started_count)
+        route_service_wait_total = sum(service_waits.values())
+        average_wait = (
+            route_service_wait_total / route_service_started_count
+            if route_service_started_count
+            else 0.0
+        )
+        censored_wait_observations = [
             service_waits.get(task_id, max(0.0, self.duration_seconds - task.arrival_time))
             for task_id, task in arrived_tasks.items()
         ]
-        average_wait = sum(waits) / len(waits) if waits else 0.0
+        censored_wait_observation = (
+            sum(censored_wait_observations) / len(censored_wait_observations)
+            if censored_wait_observations
+            else 0.0
+        )
 
         # Estimate end-window backlog growth with an OLS slope over sampled points
         # in the final five minutes. Positive values indicate rising unfinished work.
@@ -216,6 +233,12 @@ class DiscreteEventFleetSimulator:
             queue_growth_per_min=round(queue_growth, 6),
             junction_occupancy=round(min(1.0, junction_busy_seconds / self.duration_seconds), 6),
             deadlock_events=0,
+            task_arrivals=arrivals,
+            task_completions=completions,
+            route_service_started_count=route_service_started_count,
+            tasks_not_started_by_horizon=tasks_not_started_by_horizon,
+            route_service_wait_total_seconds=round(route_service_wait_total, 6),
+            censored_wait_observation_seconds=round(censored_wait_observation, 6),
         )
         return SimulationRun(
             run_id=f"{manifest.experiment_id}-seed-{manifest.seed}",
@@ -227,6 +250,8 @@ class DiscreteEventFleetSimulator:
                 "CPU-only discrete-event queueing model; not NVIDIA Isaac Sim or a physics-based digital twin.",
                 "Priority tasks receive queue precedence and longer service windows by explicit scenario assumption.",
                 "No geometry, collision, sensor, or deadlock model; deadlock_events=0 is not a safety result.",
-                f"Simulated duration: {self.duration_seconds:.0f}s; robots: {self.robot_count}; arrivals: {arrivals}; completed: {completions}.",
+                "average_wait_seconds is arrival-to-route-service-start wait among tasks whose route service began before the horizon; unfinished waits are excluded.",
+                "tasks_not_started_by_horizon counts right-censored tasks; censored_wait_observation_seconds is a separate horizon-limited descriptive metric, not a completed-wait mean.",
+                f"Simulated duration: {self.duration_seconds:.0f}s; robots: {self.robot_count}; arrivals: {arrivals}; route_service_started: {route_service_started_count}; not_started_by_horizon: {tasks_not_started_by_horizon}; completed: {completions}.",
             ],
         )

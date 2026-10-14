@@ -20,6 +20,28 @@ def _mean(runs: list[SimulationRun], key: str) -> float:
     return statistics.fmean(values) if values else 0.0
 
 
+def _pooled_started_wait(runs: list[SimulationRun]) -> tuple[float, int]:
+    """Return task-weighted wait mean and its observed route-start sample count."""
+    count = sum(run.metrics.route_service_started_count or 0 for run in runs)
+    total = sum(run.metrics.route_service_wait_total_seconds or 0.0 for run in runs)
+    return (total / count if count else 0.0), count
+
+
+def _task_counts(runs: list[SimulationRun]) -> dict[str, float | int]:
+    arrivals = sum(run.metrics.task_arrivals or 0 for run in runs)
+    completions = sum(run.metrics.task_completions or 0 for run in runs)
+    started = sum(run.metrics.route_service_started_count or 0 for run in runs)
+    not_started = sum(run.metrics.tasks_not_started_by_horizon or 0 for run in runs)
+    return {
+        "arrivals": arrivals,
+        "completions": completions,
+        "completion_fraction": completions / arrivals if arrivals else 0.0,
+        "route_service_started": started,
+        "not_started_by_horizon": not_started,
+        "not_started_fraction": not_started / arrivals if arrivals else 0.0,
+    }
+
+
 def _write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -66,7 +88,12 @@ def run_fleet_demo(
     baseline = [r for r in replay_runs if "BASELINE" in r.run_id]
     policy = [r for r in replay_runs if "POLICY" in r.run_id]
     base_t, policy_t = _mean(baseline, "throughput_tasks_per_min"), _mean(policy, "throughput_tasks_per_min")
-    base_w, policy_w = _mean(baseline, "average_wait_seconds"), _mean(policy, "average_wait_seconds")
+    base_w, base_wait_samples = _pooled_started_wait(baseline)
+    policy_w, policy_wait_samples = _pooled_started_wait(policy)
+    baseline_counts = _task_counts(baseline)
+    policy_counts = _task_counts(policy)
+    baseline_censored_exposure = _mean(baseline, "censored_wait_observation_seconds")
+    policy_censored_exposure = _mean(policy, "censored_wait_observation_seconds")
     replay_summary = {
         "paired_seed_count": replay_seeds,
         "baseline_mean_throughput": round(base_t, 6),
@@ -74,7 +101,18 @@ def run_fleet_demo(
         "throughput_change_percent": round((policy_t - base_t) / max(base_t, 1e-9) * 100, 3),
         "baseline_mean_wait_seconds": round(base_w, 6),
         "policy_mean_wait_seconds": round(policy_w, 6),
+        "baseline_wait_sample_count": base_wait_samples,
+        "policy_wait_sample_count": policy_wait_samples,
         "wait_change_percent": round((policy_w - base_w) / max(base_w, 1e-9) * 100, 3),
+        "baseline_censored_wait_observation_seconds": round(baseline_censored_exposure, 6),
+        "policy_censored_wait_observation_seconds": round(policy_censored_exposure, 6),
+        "censored_wait_observation_change_percent": round(
+            (policy_censored_exposure - baseline_censored_exposure)
+            / max(baseline_censored_exposure, 1e-9) * 100,
+            3,
+        ),
+        "baseline_task_counts": baseline_counts,
+        "policy_task_counts": policy_counts,
         "baseline_mean_queue_growth": round(_mean(baseline, "queue_growth_per_min"), 6),
         "policy_mean_queue_growth": round(_mean(policy, "queue_growth_per_min"), 6),
     }
@@ -121,6 +159,7 @@ def run_fleet_demo(
         f"> **EVIDENCE LABEL: {summary['evidence_label']}**",
         "",
         "This backend models queues and service capacity; it does not model robot geometry, collisions, sensors, or physics.",
+        "Wait metrics are separated: the reported started-task mean excludes tasks whose route service had not started by the horizon; those right-censored tasks and their horizon-limited wait-observation mean are reported separately.",
         "",
         "## Reproducibility",
         "",
@@ -145,9 +184,14 @@ def run_fleet_demo(
         f"- Baseline throughput: `{base_t:.4f}` tasks/min",
         f"- Bypass-policy throughput: `{policy_t:.4f}` tasks/min",
         f"- Throughput change: `{replay_summary['throughput_change_percent']:.2f}%`",
-        f"- Baseline average wait: `{base_w:.2f}` seconds",
-        f"- Policy average wait: `{policy_w:.2f}` seconds",
-        f"- Wait change: `{replay_summary['wait_change_percent']:.2f}%`",
+        f"- Baseline pooled arrival-to-route-start wait (tasks that started service): `{base_w:.2f}` seconds across {base_wait_samples} task samples",
+        f"- Policy pooled arrival-to-route-start wait (tasks that started service): `{policy_w:.2f}` seconds across {policy_wait_samples} task samples",
+        f"- Started-task wait change: `{replay_summary['wait_change_percent']:.2f}%`",
+        f"- Baseline tasks: {int(baseline_counts['arrivals'])} arrivals; {int(baseline_counts['completions'])} completed; {int(baseline_counts['route_service_started'])} started route service; {int(baseline_counts['not_started_by_horizon'])} not started by horizon ({baseline_counts['not_started_fraction']:.1%}).",
+        f"- Policy tasks: {int(policy_counts['arrivals'])} arrivals; {int(policy_counts['completions'])} completed; {int(policy_counts['route_service_started'])} started route service; {int(policy_counts['not_started_by_horizon'])} not started by horizon ({policy_counts['not_started_fraction']:.1%}).",
+        f"- Baseline censored wait-observation mean (all arrivals, horizon-limited): `{baseline_censored_exposure:.2f}` seconds",
+        f"- Policy censored wait-observation mean (all arrivals, horizon-limited): `{policy_censored_exposure:.2f}` seconds",
+        f"- Censored wait-observation change (descriptive only): `{replay_summary['censored_wait_observation_change_percent']:.2f}%`",
         "",
         "## Explicit limitations",
         "",
