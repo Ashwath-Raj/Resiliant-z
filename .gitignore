@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets / local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.yaml
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Experiment outputs: commit selected summaries/fixtures only
+artifacts/**
+!artifacts/.gitkeep
+!artifacts/README.md
+outputs/
+runs/
+*.sqlite3
+*.db
+
+# Isaac Sim / Omniverse caches and large downloaded assets
+_isaac_sim/
+isaacsim/
+.omniverse/
+.kit/
+shadercache/
+cache/
+# Add large third-party assets to Git LFS or keep them outside the repository.
+# Authored small USD/USDZ scene files are not globally ignored.
+*.onnx
+*.engine
+*.pt
+*.pth
+*.safetensors

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RESILIANT-Z · Fleet Discovery Lab</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0a1020; --panel:#121b2d; --panel2:#17243a; --line:#293750; --text:#edf3ff; --muted:#91a4c2; --blue:#69a9ff; --teal:#5de0c0; --amber:#f2c879; --red:#ff897e; }
+    * { box-sizing:border-box; } body { margin:0; background:radial-gradient(ellipse at top left,#142747 0%,var(--bg) 48%); color:var(--text); font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif; }
+    .shell { max-width:1200px; margin:auto; padding:32px 22px 60px; } header { display:flex; justify-content:space-between; align-items:center; gap:16px; border-bottom:1px solid var(--line); padding-bottom:22px; }
+    .eyebrow { color:var(--teal); font-size:11px; text-transform:uppercase; letter-spacing:.18em; font-weight:800; } h1 { font-size:clamp(27px,4vw,42px); line-height:1.08; margin:7px 0 8px; letter-spacing:-.035em; } .subtitle { color:var(--muted); max-width:690px; } .status { padding:7px 10px; border:1px solid #3c5a58; background:#102e30; color:var(--teal); border-radius:7px; white-space:nowrap; font-size:12px; }
+    .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:15px; margin-top:22px; } .panel { background:linear-gradient(180deg,rgba(20,31,51,.97),rgba(15,24,41,.97)); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; } .span-8 { grid-column:span 8; } .span-4 { grid-column:span 4; } .span-6 { grid-column:span 6; } .span-12 { grid-column:span 12; }
+    h2 { font-size:15px; margin:0 0 11px; font-weight:700; } p { margin:7px 0; color:var(--muted); } .big { font-size:30px; font-weight:750; letter-spacing:-.03em; } .muted { color:var(--muted); } .small { font-size:12px; color:var(--muted); } .metric-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; } .metric { background:var(--panel2); border:1px solid var(--line); padding:13px; border-radius:9px; } .metric .label { color:var(--muted); font-size:12px; } .metric .value { margin-top:5px; font-size:22px; font-weight:700; }
+    button { background:var(--blue); border:0; color:#061223; font-weight:800; padding:11px 15px; border-radius:8px; cursor:pointer; } button:disabled { opacity:.55; cursor:wait; } .control-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:13px; } label { color:var(--muted); display:flex; gap:8px; align-items:center; font-size:13px; } input[type=checkbox] { accent-color:var(--teal); } .pill { display:inline-block; border-radius:5px; padding:3px 7px; font-size:11px; color:var(--amber); background:#352c1c; border:1px solid #67532e; margin-bottom:12px; }
+    .hypothesis { border-top:1px solid var(--line); padding:12px 0; } .hypothesis:first-of-type { border-top:0; } .hypothesis b { color:var(--blue); } .barrow { display:grid; grid-template-columns:130px 1fr 65px; gap:10px; align-items:center; margin:10px 0; font-size:12px; } .track { height:9px; background:#26344c; overflow:hidden; border-radius:99px; } .bar { height:100%; background:linear-gradient(90deg,#5b94ed,#5de0c0); border-radius:99px; width:0%; transition:width .3s; } .result { white-space:pre-wrap; word-break:break-word; background:#080e19; color:#bad0ee; border:1px solid var(--line); border-radius:8px; padding:12px; max-height:230px; overflow:auto; font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; }
+    footer { margin-top:24px; color:var(--muted); font-size:12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; } .good { color:var(--teal)!important; } .bad { color:var(--red)!important; }
+    @media(max-width:800px){ .span-8,.span-4,.span-6 { grid-column:span 12; } header { align-items:flex-start; flex-direction:column; } .metric-grid { grid-template-columns:1fr; } .barrow { grid-template-columns:105px 1fr 52px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div><div class="eyebrow">Autonomous fleet operational discovery</div><h1>RESILIANT-Z</h1><div class="subtitle">Investigate unexplained behavior. Test competing hypotheses. Let reproducible evidence—not an LLM's confidence—decide what survives.</div></div>
+      <div class="status" id="service-status">● LOCAL API · CONNECTING</div>
+    </header>
+    <div class="grid">
+      <section class="panel span-8">
+        <div class="pill">CONTROLLED BENCHMARK · NO GPU REQUIRED</div>
+        <h2>Run the discovery benchmark</h2>
+        <p>Executes a seeded factorial experiment, compares main-effects and interaction models on held-out seeds, then runs paired before/after policy replay.</p>
+        <div class="control-row"><button id="run-button">Run benchmark</button><label><input id="use-nebius" type="checkbox"> Generate hypotheses with Nebius Token Factory</label></div>
+        <p class="small" id="run-state">Offline local mode is free and makes no external API call. Enabling Token Factory uses your account's API credits.</p>
+      </section>
+      <section class="panel span-4">
+        <h2>Research boundary</h2>
+        <p><b>Current backend:</b> synthetic surrogate</p><p>This validates pipeline logic only. It is not an Isaac Sim run, a digital twin validation, or evidence about real robots.</p><p class="small">The Isaac Sim execution/metrics bridge is a separate integration task.</p>
+      </section>
+      <section class="panel span-12">
+        <h2>Decision summary</h2>
+        <div class="metric-grid">
+          <div class="metric"><div class="label">Discovery status</div><div class="value" id="decision-status">—</div></div>
+          <div class="metric"><div class="label">Held-out error improvement</div><div class="value" id="validation-improvement">—</div></div>
+          <div class="metric"><div class="label">Recorded runs</div><div class="value" id="run-count">—</div></div>
+        </div>
+      </section>
+      <section class="panel span-6">
+        <h2>Generalization · model error (RMSE)</h2>
+        <div class="barrow"><span>Main-effects</span><div class="track"><div id="bar-main" class="bar"></div></div><strong id="val-main">—</strong></div>
+        <div class="barrow"><span>Interaction model</span><div class="track"><div id="bar-interaction" class="bar"></div></div><strong id="val-interaction">—</strong></div>
+        <p class="small">Both models are fitted on discovery data and evaluated on independent seeds. Lower is better.</p>
+      </section>
+      <section class="panel span-6">
+        <h2>Policy replay · matched seeds</h2>
+        <div class="metric-grid">
+          <div class="metric"><div class="label">Throughput change</div><div class="value" id="throughput-change">—</div></div>
+          <div class="metric"><div class="label">Waiting-time change</div><div class="value" id="wait-change">—</div></div>
+          <div class="metric"><div class="label">Paired seeds</div><div class="value" id="paired-seeds">—</div></div>
+        </div>
+        <p class="small">Surrogate-only policy intervention; improvement percentages are not real-robot claims.</p>
+      </section>
+      <section class="panel span-6">
+        <h2>Hypotheses</h2><div id="hypothesis-list"><p>Run the benchmark to populate hypotheses and provenance.</p></div>
+      </section>
+      <section class="panel span-6">
+        <h2>Run provenance</h2><div class="result" id="provenance">No run yet. Artifacts will be written to artifacts/web-demo/.</div>
+      </section>
+    </div>
+    <footer><span>RESILIANT-Z · Research prototype · Evidence-driven, bounded autonomy</span><span>Local first · No paid compute provisioned by this app</span></footer>
+  </div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  async function checkHealth(){try{const r=await fetch('/api/health');if(!r.ok)throw new Error();const d=await r.json();$('service-status').textContent=`● API ONLINE · v${d.version}`;}catch{$('service-status').textContent='● API UNAVAILABLE';$('service-status').classList.add('bad');}}
+  function setText(id,value){$(id).textContent=value;}
+  function pct(v){return `${Number(v).toFixed(1)}%`;}
+  function render(d){const x=d.discovery, r=d.policy_replay, h=d.hypothesis_generation;
+    setText('decision-status',x.status.toUpperCase());$('decision-status').className='value '+(x.status==='validated'?'good':'bad');
+    setText('validation-improvement',pct(x.validation_improvement_fraction*100));setText('run-count',d.counts.total_runs);
+    const max=Math.max(x.validation_main_effect_rmse,x.validation_interaction_rmse,1e-6);
+    $('bar-main').style.width=`${x.validation_main_effect_rmse/max*100}%`;$('bar-interaction').style.width=`${x.validation_interaction_rmse/max*100}%`;
+    setText('val-main',x.validation_main_effect_rmse.toFixed(4));setText('val-interaction',x.validation_interaction_rmse.toFixed(4));
+    setText('throughput-change',pct(r.throughput_change_percent));setText('wait-change',pct(r.wait_change_percent));setText('paired-seeds',r.paired_seed_count);
+    $('hypothesis-list').innerHTML='';h.hypotheses.hypotheses.forEach(v=>{const row=document.createElement('div');row.className='hypothesis';const b=document.createElement('b');b.textContent=`${v.hypothesis_id} · ${v.kind}`;const p=document.createElement('p');p.textContent=v.claim;const q=document.createElement('p');q.className='small';q.textContent=`Falsification: ${v.falsification_test}`;row.append(b,p,q);$('hypothesis-list').append(row);});
+    const prov={evidence_label:d.evidence_label,backend:d.backend,hypothesis_source:h.source,model_id:h.model_id,git_sha:d.git_sha,counts:d.counts,discovery:x.status,interaction_effect:x.interaction_effect,artifact_path:'artifacts/web-demo/'};setText('provenance',JSON.stringify(prov,null,2));
+  }
+  $('run-button').addEventListener('click',async()=>{const button=$('run-button');button.disabled=true;setText('run-state','Running controlled benchmark and held-out validation…');setText('decision-status','RUNNING');try{const mode=$('use-nebius').checked?'nebius':'local';const response=await fetch('/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hypotheses_mode:mode,seeds_per_cell:5,replay_seeds:12})});const data=await response.json();if(!response.ok)throw new Error(data.detail||`HTTP ${response.status}`);render(data);setText('run-state',`Complete. Hypothesis source: ${data.hypothesis_generation.source}. Full report: artifacts/web-demo/report.md`);}catch(e){setText('run-state',`Run failed: ${e.message}`);setText('decision-status','ERROR');}finally{button.disabled=false;}});
+  checkHealth();
+</script>
+</body>
+</html>
