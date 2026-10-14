@@ -20,6 +20,18 @@ from resiliant_z.models import SimulationRun
 from resiliant_z.simulation.discrete_event import DiscreteEventFleetSimulator
 from resiliant_z.simulation.surrogate import current_git_sha
 
+# Predeclared weights for the policy-selection loss. Each component is normalized
+# to [0, 1]; lower scores are preferred. The weights are design choices, not learned.
+POLICY_OBJECTIVE_WEIGHTS = {
+    "completion_shortfall": 0.40,
+    "not_started_fraction": 0.20,
+    "normalized_started_wait": 0.20,
+    "normalized_queue_growth": 0.10,
+    "bypass_detour_capacity_fraction": 0.05,
+    "bypass_intervention_fraction": 0.05,
+}
+WAIT_NORMALIZATION_SECONDS = 60.0
+
 
 def _mean(runs: list[SimulationRun], key: str) -> float:
     values = [float(getattr(run.metrics, key)) for run in runs]
@@ -31,6 +43,50 @@ def _pooled_started_wait(runs: list[SimulationRun]) -> tuple[float, int]:
     count = sum(run.metrics.route_service_started_count or 0 for run in runs)
     total = sum(run.metrics.route_service_wait_total_seconds or 0.0 for run in runs)
     return (total / count if count else 0.0), count
+
+
+def _policy_objective_components(run: SimulationRun) -> dict[str, float]:
+    """Calculate transparent, normalized operational penalties for one run."""
+    metrics = run.metrics
+    parameters = run.experiment.parameters
+    arrivals = metrics.task_arrivals or 0
+    completions = metrics.task_completions or 0
+    not_started = metrics.tasks_not_started_by_horizon or 0
+    bypass_tasks = metrics.bypass_task_count or 0
+    bypass_detour_seconds = metrics.bypass_detour_total_seconds or 0.0
+
+    completion_shortfall = max(0.0, 1.0 - completions / arrivals) if arrivals else 0.0
+    not_started_fraction = min(1.0, not_started / arrivals) if arrivals else 0.0
+    normalized_started_wait = min(1.0, metrics.average_wait_seconds / WAIT_NORMALIZATION_SECONDS)
+    arrival_rate_per_minute = 12.0 * parameters.traffic_demand
+    normalized_queue_growth = min(
+        1.0, metrics.queue_growth_per_min / arrival_rate_per_minute
+    )
+    available_robot_seconds = (
+        DiscreteEventFleetSimulator.robot_count * DiscreteEventFleetSimulator.duration_seconds
+    )
+    bypass_detour_capacity_fraction = min(
+        1.0, bypass_detour_seconds / available_robot_seconds
+    )
+    bypass_intervention_fraction = min(1.0, bypass_tasks / arrivals) if arrivals else 0.0
+
+    return {
+        "completion_shortfall": completion_shortfall,
+        "not_started_fraction": not_started_fraction,
+        "normalized_started_wait": normalized_started_wait,
+        "normalized_queue_growth": normalized_queue_growth,
+        "bypass_detour_capacity_fraction": bypass_detour_capacity_fraction,
+        "bypass_intervention_fraction": bypass_intervention_fraction,
+    }
+
+
+def _policy_objective_score(run: SimulationRun) -> float:
+    """Weighted normalized penalty; lower is better, with fixed published weights."""
+    components = _policy_objective_components(run)
+    return sum(
+        weight * components[name]
+        for name, weight in POLICY_OBJECTIVE_WEIGHTS.items()
+    )
 
 
 def _task_counts(runs: list[SimulationRun]) -> dict[str, float | int]:
@@ -76,6 +132,8 @@ def _paired_delta(
             arrivals = run.metrics.task_arrivals or 0
             completions = run.metrics.task_completions or 0
             return completions / arrivals if arrivals else 0.0
+        if metric == "policy_objective_score":
+            return _policy_objective_score(run)
         return float(getattr(run.metrics, metric))
 
     differences = [
@@ -104,8 +162,30 @@ def _arm_summary(runs: list[SimulationRun]) -> dict:
         "mean_started_task_wait_seconds": round(started_wait, 6),
         "started_task_wait_sample_count": started_wait_samples,
         "mean_queue_growth_per_min": round(_mean(runs, "queue_growth_per_min"), 6),
+        "mean_bypass_detour_total_seconds": round(
+            _mean(runs, "bypass_detour_total_seconds"), 6
+        ),
+        "mean_policy_objective_score": round(
+            statistics.fmean(_policy_objective_score(run) for run in runs) if runs else 0.0,
+            6,
+        ),
+        "mean_policy_objective_components": {
+            name: round(
+                statistics.fmean(_policy_objective_components(run)[name] for run in runs)
+                if runs
+                else 0.0,
+                6,
+            )
+            for name in POLICY_OBJECTIVE_WEIGHTS
+        },
         "task_counts": task_counts,
         "bypass_tasks_total": sum(run.metrics.bypass_task_count or 0 for run in runs),
+        "bypass_intervention_fraction": (
+            sum(run.metrics.bypass_task_count or 0 for run in runs)
+            / sum(run.metrics.task_arrivals or 0 for run in runs)
+            if sum(run.metrics.task_arrivals or 0 for run in runs)
+            else 0.0
+        ),
         "high_risk_context_arrivals_total": sum(
             run.metrics.high_risk_context_arrival_count or 0 for run in runs
         ),
@@ -154,6 +234,9 @@ def _summarize_policy_comparison(
                     "completion_fraction",
                     "average_wait_seconds",
                     "queue_growth_per_min",
+                    "bypass_task_count",
+                    "bypass_detour_total_seconds",
+                    "policy_objective_score",
                 )
             }
 
@@ -199,9 +282,9 @@ def _write_jsonl(path: Path, rows: list[dict]) -> None:
 def _select_bypass_ratio(runs: list[SimulationRun]) -> tuple[float, list[dict]]:
     """Select a treatment using policy-selection seeds only.
 
-    Predeclared lexicographic objective: maximize mean tasks completed during
-    the fixed horizon; break ties by lower end-window queue-growth slope, then
-    by the smallest bypass ratio. The final paired replay uses different seeds.
+    Minimize the predeclared weighted normalized operational penalty. The final
+    paired replay uses different seeds. Component scores and weights are emitted
+    in the artifacts so the trade-off is auditable.
     """
     if not runs:
         raise ValueError("Cannot select a policy without candidate runs")
@@ -226,18 +309,33 @@ def _select_bypass_ratio(runs: list[SimulationRun]) -> tuple[float, list[dict]]:
                 "mean_queue_growth_per_min": round(
                     _mean(candidate_runs, "queue_growth_per_min"), 6
                 ),
+                "mean_bypass_detour_total_seconds": round(
+                    _mean(candidate_runs, "bypass_detour_total_seconds"), 6
+                ),
+                "mean_bypass_intervention_fraction": round(
+                    sum(run.metrics.bypass_task_count or 0 for run in candidate_runs)
+                    / sum(run.metrics.task_arrivals or 0 for run in candidate_runs),
+                    6,
+                ),
+                "mean_policy_objective_score": round(
+                    statistics.fmean(_policy_objective_score(run) for run in candidate_runs),
+                    6,
+                ),
+                "mean_policy_objective_components": {
+                    name: round(
+                        statistics.fmean(_policy_objective_components(run)[name]
+                                         for run in candidate_runs),
+                        6,
+                    )
+                    for name in POLICY_OBJECTIVE_WEIGHTS
+                },
             }
         )
 
-    # The result rows carry the seed count and means used by the declared score.
-    # Lower wait and then lower intervention break ties in that order.
+    # Minimum loss wins; the bypass ratio is a deterministic tie-break only.
     winner = min(
         candidate_results,
-        key=lambda row: (
-            -row["mean_completed_tasks"],
-            row["mean_queue_growth_per_min"],
-            row["bypass_ratio"],
-        ),
+        key=lambda row: (row["mean_policy_objective_score"], row["bypass_ratio"]),
     )
     return float(winner["bypass_ratio"]), candidate_results
 
@@ -300,9 +398,17 @@ def run_fleet_demo(
         "seeds_per_candidate": policy_selection_seeds,
         "candidate_results": candidate_results,
         "selection_objective": (
-            "maximize mean tasks completed within the fixed horizon; tie-break by lower end-window "
-            "queue-growth slope; then choose the smaller bypass ratio"
+            "minimize a weighted normalized operational penalty: completion shortfall, tasks not "
+            "started by the horizon, started-task wait, queue growth, applied bypass detour capacity, "
+            "and bypass intervention frequency; lower bypass ratio breaks exact score ties"
         ),
+        "selection_objective_weights": POLICY_OBJECTIVE_WEIGHTS,
+        "selection_objective_normalization": {
+            "started_task_wait_seconds": WAIT_NORMALIZATION_SECONDS,
+            "queue_growth": "normalized by model arrival rate (12 * traffic_demand tasks/min), capped at 1",
+            "bypass_detour_capacity": "applied detour seconds / (robot count * simulated horizon seconds), capped at 1",
+            "other_fractions": "bounded fractions in [0, 1]",
+        },
         "seed_protocol": (
             "all candidates share seeds within policy selection; final paired replay uses a "
             "disjoint seed range"
@@ -350,6 +456,7 @@ def run_fleet_demo(
             "duration_seconds": simulator.duration_seconds,
             "arrivals": "Poisson process at 0.20 * traffic_demand tasks/second",
             "priority_effect": "priority-first service order with longer service windows",
+            "bypass_detour_seconds": "2.5s default extra robot-occupancy time after a bypass route completes; configurable 0-30s and not empirically calibrated",
             "conditional_policy": "bypass only when demand and priority are in the predefined high-risk envelope and junction queue pressure reaches the trigger",
             "policy_thresholds": "predeclared midpoints between factorial design levels, not discovered thresholds",
             "paired_randomness": "per-task random variates are pre-sampled for policy comparisons",
@@ -370,6 +477,7 @@ def run_fleet_demo(
         "",
         "This backend models queues and service capacity; it does not model robot geometry, collisions, sensors, or physics.",
         "Wait metrics are separated: the reported started-task mean excludes tasks whose route service had not started by the horizon; those right-censored tasks and their horizon-limited wait-observation mean are reported separately.",
+        "The bypass route adds a default 2.5 simulated seconds to robot return/availability after its route service completes. This is an explicit uncalibrated scenario cost, not measured travel time.",
         "",
         "## Reproducibility",
         "",
@@ -395,13 +503,17 @@ def run_fleet_demo(
         f"- Selection runs: `{len(selection_runs)}`",
         f"- Selected bypass ratio: `{selected_bypass_ratio:.2f}`",
         f"- Predeclared objective: {policy_selection['selection_objective']}",
-        "- Candidate scores (selection seeds only):",
+        f"- Objective weights: `{json.dumps(POLICY_OBJECTIVE_WEIGHTS, sort_keys=True)}`",
+        "- Candidate scores (selection seeds only; lower policy objective score is preferred):",
         *(
             [
-                f"  - bypass `{row['bypass_ratio']:.2f}`: completed `{row['mean_completed_tasks']:.2f}` tasks/run; "
+                f"  - bypass `{row['bypass_ratio']:.2f}`: objective score `{row['mean_policy_objective_score']:.5f}`; "
+                f"completed `{row['mean_completed_tasks']:.2f}` tasks/run; "
                 f"throughput `{row['mean_throughput_tasks_per_min']:.3f}` tasks/min; "
                 f"queue growth `{row['mean_queue_growth_per_min']:.3f}`/min; "
-                f"started-task wait `{row['pooled_started_task_wait_seconds']:.2f}` s"
+                f"started-task wait `{row['pooled_started_task_wait_seconds']:.2f}` s; "
+                f"detour `{row['mean_bypass_detour_total_seconds']:.2f}` s/run; "
+                f"bypass rate `{row['mean_bypass_intervention_fraction']:.1%}`"
                 for row in candidate_results
             ]
             or ["  - No candidates evaluated because discovery was not validated."]
@@ -433,6 +545,8 @@ def run_fleet_demo(
                 f"completion `{task_counts['completions']}/{task_counts['arrivals']}` "
                 f"({task_counts['completion_fraction']:.1%}); "
                 f"queue growth `{arm_result['mean_queue_growth_per_min']:.3f}`/min; "
+                f"objective score `{arm_result['mean_policy_objective_score']:.5f}`; "
+                f"applied bypass detour `{arm_result['mean_bypass_detour_total_seconds']:.2f}` s/run; "
                 f"bypass tasks `{arm_result['bypass_tasks_total']}`; "
                 f"conditional triggers `{arm_result['conditional_policy_triggers_total']}`."
             )

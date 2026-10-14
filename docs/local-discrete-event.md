@@ -13,6 +13,7 @@
 - Poisson task arrivals at `0.20 * traffic_demand` tasks per simulated second. `traffic_demand` is a scenario multiplier, not a real-world calibrated arrival rate.
 - Tasks are assigned to an available robot; robots remain occupied through approach, route service and delivery/return.
 - Through-tasks share one junction service queue; the `bypass_ratio` selects a separate route/server.
+- Each bypass route that completes route service adds `bypass_detour_seconds` to the robot's return/availability time (default `2.5` simulated seconds; allowed range `0–30`). This represents an explicit detour cost. The default is a scenario-design value, not a measured or calibrated travel cost. The reported cumulative cost counts applied detour seconds in route completions observed within the horizon.
 - Priority tasks are scheduled ahead of normal tasks and have longer service windows. This is an explicit scenario assumption intended to expose workload/capacity interactions, not a universal physical fact.
 - Random events derive from the experiment manifest's seed. Metrics should be deterministic for the same code, manifest and Python runtime.
 - Geometry, collisions, kinematics, sensors, battery, blocked paths and true deadlocks are not modeled. `deadlock_events=0` is structurally imposed, not a safety metric.
@@ -51,9 +52,11 @@ Both simulator backends are intended to return the shared `SimulationRun` contra
 
 ## Policy-selection protocol
 
-A policy intervention is considered only after the held-out discovery gate returns `validated`. The runner then evaluates the predeclared bypass candidates `(0.00, 0.15, 0.30, 0.45)` on shared policy-selection seeds. It selects the candidate maximizing mean completed tasks within the fixed horizon; ties are broken by lower end-window queue-growth slope and then by the lower bypass ratio. Candidate-selection seeds are separate from the final paired replay seeds. If discovery is `inconclusive` or `rejected`, the intervention is blocked and the selected bypass ratio remains zero.
+A policy intervention is considered only after the held-out discovery gate returns `validated`. The runner then evaluates the predeclared bypass candidates `(0.00, 0.15, 0.30, 0.45)` on shared policy-selection seeds. It selects the candidate with the lowest predeclared weighted normalized operational penalty; exact score ties are broken by the lower bypass ratio. Candidate-selection seeds are separate from the final paired replay seeds. If discovery is `inconclusive` or `rejected`, the intervention is blocked and the selected bypass ratio remains zero.
 
-This is an explicit experimental policy-selection rule, not a learned continuous controller. The candidate list, high-stress operating condition, objective and tie-breaking order are fixed in advance and are recorded in the report. Final replay estimates the selected intervention's effect on new paired seeds.
+The objective weights are fixed in code and emitted in `summary.json`: completion shortfall `0.40`, tasks not started by the horizon `0.20`, started-task wait normalized by 60 s `0.20`, queue growth normalized by arrival rate `0.10`, bypass detour capacity fraction `0.05`, and bypass intervention fraction `0.05`. Each component is normalized/capped to `[0, 1]`; lower scores are preferred. Completion shortfall and not-started fraction intentionally put extra weight on work that remains unfinished at the horizon. The weight choices are design judgments, not learned parameters or validated business costs.
+
+This is an explicit experimental policy-selection rule, not a learned continuous controller. The candidate list, high-stress operating condition, objective weights and tie-breaking order are fixed in advance and recorded in the report. Final replay estimates the selected intervention's effect on new paired seeds; the score does not replace the underlying raw metrics.
 
 
 ## Three-arm conditional-policy comparison

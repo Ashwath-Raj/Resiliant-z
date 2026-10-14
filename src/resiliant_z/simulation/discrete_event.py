@@ -141,6 +141,7 @@ class DiscreteEventFleetSimulator:
         backlog_samples: list[tuple[float, int]] = [(0.0, 0)]
         junction_busy_seconds = 0.0
         bypass_task_count = 0
+        bypass_detour_total_seconds = 0.0
         high_risk_context_arrival_count = 0
         conditional_policy_trigger_count = 0
 
@@ -225,8 +226,16 @@ class DiscreteEventFleetSimulator:
             elif kind == "route_done":
                 route, robot_id, task = payload  # type: ignore[misc]
                 route_busy[route] = False
-                # The robot remains busy through a short delivery/return phase.
-                schedule(now + task.return_seconds, "robot_free", (robot_id, task))
+                # The bypass is faster at the server but carries an explicit detour
+                # cost that keeps the robot occupied longer before it can take a task.
+                detour_seconds = p.bypass_detour_seconds if route == "bypass" else 0.0
+                if route == "bypass":
+                    bypass_detour_total_seconds += detour_seconds
+                schedule(
+                    now + task.return_seconds + detour_seconds,
+                    "robot_free",
+                    (robot_id, task),
+                )
                 start_route(route, now)
             elif kind == "robot_free":
                 robot_id, _task = payload  # type: ignore[misc]
@@ -290,6 +299,7 @@ class DiscreteEventFleetSimulator:
             route_service_wait_total_seconds=round(route_service_wait_total, 6),
             censored_wait_observation_seconds=round(censored_wait_observation, 6),
             bypass_task_count=bypass_task_count,
+            bypass_detour_total_seconds=round(bypass_detour_total_seconds, 6),
             high_risk_context_arrival_count=high_risk_context_arrival_count,
             conditional_policy_trigger_count=conditional_policy_trigger_count,
         )
@@ -302,7 +312,8 @@ class DiscreteEventFleetSimulator:
             notes=[
                 "CPU-only discrete-event queueing model; not NVIDIA Isaac Sim or a physics-based digital twin.",
                 "Priority tasks receive queue precedence and longer service windows by explicit scenario assumption.",
-                f"Routing policy: {p.routing_policy}; bypass ratio: {p.bypass_ratio:.2f}; actual bypass tasks: {bypass_task_count}; conditional triggers: {conditional_policy_trigger_count}.",
+                f"Routing policy: {p.routing_policy}; bypass ratio: {p.bypass_ratio:.2f}; assigned bypass tasks: {bypass_task_count}; applied bypass detour: {bypass_detour_total_seconds:.2f}s; conditional triggers: {conditional_policy_trigger_count}.",
+                f"Bypass detour assumption: each bypass route that finishes route service adds {p.bypass_detour_seconds:.2f}s to robot return/availability time; this is a design setting, not measured real-world travel cost.",
                 "Task-level random variates are pre-sampled to improve paired-policy comparability (common random numbers).",
                 "No geometry, collision, sensor, or deadlock model; deadlock_events=0 is not a safety result.",
                 "average_wait_seconds is arrival-to-route-service-start wait among tasks whose route service began before the horizon; unfinished waits are excluded.",

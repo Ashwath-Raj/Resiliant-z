@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from resiliant_z.experiments.planner import (
     factorial_manifests,
     policy_comparison_manifests,
@@ -171,3 +174,64 @@ def test_policy_arms_share_task_workload_for_same_condition_and_seed():
     assert len(results) == 3
     assert len({run.metrics.task_arrivals for run in results}) == 1
     assert len({run.metrics.high_risk_context_arrival_count for run in results}) == 1
+
+
+def test_bypass_detour_cost_is_explicit_and_reduces_robot_availability():
+    sim = DiscreteEventFleetSimulator()
+    base = ExperimentManifest(
+        experiment_id="DES-BYPASS-DET0",
+        stage="replay",
+        seed=74123,
+        scenario_id="priority_junction_high_risk_v1",
+        parameters=ExperimentParameters(
+            traffic_demand=1.05,
+            priority_ratio=0.50,
+            bypass_ratio=0.45,
+            routing_policy="static",
+            bypass_detour_seconds=0.0,
+        ),
+    )
+    costly = base.model_copy(
+        update={
+            "experiment_id": "DES-BYPASS-DET12",
+            "parameters": base.parameters.model_copy(update={"bypass_detour_seconds": 12.0}),
+        }
+    )
+
+    no_detour_result = sim.run(base)
+    costly_result = sim.run(costly)
+
+    assert no_detour_result.metrics.bypass_task_count == costly_result.metrics.bypass_task_count
+    assert no_detour_result.metrics.bypass_detour_total_seconds == 0.0
+    assert costly_result.metrics.bypass_detour_total_seconds > 0.0
+    assert costly_result.metrics.task_completions <= no_detour_result.metrics.task_completions
+    assert any("not measured real-world travel cost" in note for note in costly_result.notes)
+
+
+def test_bypass_detour_parameter_is_bounded():
+    manifest = ExperimentManifest(
+        experiment_id="DES-BYPASS-BOUND",
+        stage="replay",
+        seed=1,
+        parameters=ExperimentParameters(
+            traffic_demand=0.55,
+            priority_ratio=0.15,
+            bypass_ratio=0.0,
+            bypass_detour_seconds=2.5,
+        ),
+    )
+    assert manifest.parameters.bypass_detour_seconds == 2.5
+    with pytest.raises(ValidationError):
+        ExperimentParameters(
+            traffic_demand=0.55,
+            priority_ratio=0.15,
+            bypass_ratio=0.0,
+            bypass_detour_seconds=-0.1,
+        )
+    with pytest.raises(ValidationError):
+        ExperimentParameters(
+            traffic_demand=0.55,
+            priority_ratio=0.15,
+            bypass_ratio=0.0,
+            bypass_detour_seconds=30.1,
+        )
