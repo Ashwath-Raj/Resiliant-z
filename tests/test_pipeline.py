@@ -13,6 +13,7 @@ def test_demo_writes_artifacts_and_labels_surrogate_honestly(tmp_path):
     assert summary["backend"] == "surrogate"
     assert "NOT ISAAC SIM" in summary["evidence_label"]
     assert summary["discovery"]["status"] == "validated"
+    assert summary["discovery"]["validation_interaction_ci_upper"] < 0
     assert summary["counts"]["discovery_runs"] == 12
     assert summary["counts"]["validation_runs"] == 12
     assert summary["counts"]["replay_runs"] == 6
@@ -21,3 +22,21 @@ def test_demo_writes_artifacts_and_labels_surrogate_honestly(tmp_path):
     assert "SURROGATE" in (tmp_path / "report.md").read_text()
     data = json.loads((tmp_path / "summary.json").read_text())
     assert data["hypothesis_generation"]["source"] == "local_baseline"
+
+
+def test_local_fleet_demo_labels_discrete_event_not_isaac(tmp_path):
+    from resiliant_z.fleet_pipeline import run_fleet_demo
+
+    summary = run_fleet_demo(
+        output_dir=tmp_path / "fleet",
+        seeds_per_cell=3,
+        replay_seeds=3,
+    )
+    assert summary["backend"] == "discrete_event"
+    assert "NOT ISAAC SIM" in summary["evidence_label"]
+    assert summary["counts"]["discovery_runs"] == 12
+    assert summary["counts"]["validation_runs"] == 12
+    assert summary["counts"]["replay_runs"] == 6
+    assert (tmp_path / "fleet" / "report.md").is_file()
+    text = (tmp_path / "fleet" / "report.md").read_text()
+    assert "queueing model" in text

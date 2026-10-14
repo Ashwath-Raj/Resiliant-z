@@ -17,7 +17,7 @@ class StrictModel(BaseModel):
 class ExperimentParameters(StrictModel):
     """Inputs exposed by the controlled benchmark scenario."""
 
-    traffic_demand: float = Field(ge=0.4, le=1.2, description="Normalized incoming tasks/minute")
+    traffic_demand: float = Field(ge=0.4, le=1.2, description="Normalized workload multiplier used by the controlled scenario")
     priority_ratio: float = Field(ge=0.1, le=0.6, description="Fraction of priority tasks")
     bypass_ratio: float = Field(ge=0.0, le=0.5, description="Fraction of traffic diverted from the junction")
 
@@ -53,7 +53,7 @@ class SimulationRun(StrictModel):
 
     run_id: str
     experiment: ExperimentManifest
-    backend: Literal["surrogate", "isaac_sim_import"]
+    backend: Literal["surrogate", "discrete_event", "isaac_sim_import"]
     metrics: ScenarioMetrics
     started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     status: Literal["completed", "failed"] = "completed"
@@ -86,4 +86,7 @@ class DiscoveryDecision(StrictModel):
     validation_improvement_fraction: float
     sample_count_discovery: int
     sample_count_validation: int
+    validation_interaction_effect: float | None = None
+    validation_interaction_ci_lower: float | None = None
+    validation_interaction_ci_upper: float | None = None
     limitations: list[str] = Field(default_factory=list)

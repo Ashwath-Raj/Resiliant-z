@@ -11,6 +11,7 @@ RESILIANT-Z investigates whether an operational relationship absent from an init
 This starter repository contains a runnable first vertical slice:
 
 - a deterministic, seeded **synthetic surrogate** for local development and CI;
+- a CPU-only **discrete-event fleet model** with robot availability, shared junction/bypass queues, priority service, seeded arrivals and held-out interaction analysis;
 - a validated experiment-manifest contract and a bounded 2×2 factorial plan;
 - local baseline hypotheses and an optional Nebius Token Factory hypothesis-generation adapter;
 - a main-effects versus interaction-model comparison using NumPy least squares;
@@ -68,6 +69,18 @@ Generated files are written to `artifacts/demo/`:
 The default run contains 20 discovery runs, 20 validation runs and 24 policy-replay runs (12 matched seeds × 2 policy settings). One discovery run is also used as the hypothesis-generation pilot; it is not duplicated in the run records.
 
 This local run is deliberately free and offline. Its output must retain the `SYNTHETIC SURROGATE — NOT ISAAC SIM` label.
+
+## Run the local discrete-event fleet model (still no GPU/API required)
+
+```bash
+.venv/bin/resiliant fleet-demo
+```
+
+This mode runs a ten-robot queueing model for a 15-minute simulated horizon. Arrivals, robot availability, approach travel, a shared junction server, a separate bypass server, priority scheduling and return-to-availability are represented as deterministic events under a fixed seed. It is more behavior-driven than the formula-based surrogate, but it still omits geometry, collisions, sensors, kinematics and physical robot control.
+
+The default experiment uses 20 discovery runs, 20 held-out validation runs, and 24 paired replay runs. Its report records a held-out difference-in-differences estimate and a conservative 95% interval. A result may be `inconclusive`; the tool must not be tuned merely to force a positive decision. All output remains labelled `LOCAL DISCRETE-EVENT FLEET MODEL — NOT ISAAC SIM`.
+
+Artifacts are written to `artifacts/fleet-demo/`. This mode is completely local and does not call Token Factory or provision GPU compute.
 
 ## Run the browser dashboard
 
@@ -147,6 +160,7 @@ CI runs Ruff and pytest without needing Isaac Sim or Token Factory credentials.
 .venv/bin/resiliant doctor
 .venv/bin/resiliant models
 .venv/bin/resiliant demo --hypotheses local
+.venv/bin/resiliant fleet-demo
 .venv/bin/resiliant demo --hypotheses auto
 .venv/bin/resiliant demo --hypotheses nebius
 .venv/bin/resiliant validate-isaac-csv artifacts/isaac/metrics.csv

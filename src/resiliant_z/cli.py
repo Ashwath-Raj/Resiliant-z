@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 
 from resiliant_z import __version__
 from resiliant_z.llm.nebius import DEFAULT_BASE_URL, nebius_is_configured
+from resiliant_z.fleet_pipeline import run_fleet_demo
 from resiliant_z.pipeline import run_demo
 from resiliant_z.simulation.isaac_csv import import_isaac_metrics_csv
 
@@ -28,6 +29,14 @@ def _get_parser() -> argparse.ArgumentParser:
     demo.add_argument("--hypotheses", choices=["auto", "local", "nebius"], default="auto")
     demo.add_argument("--seeds-per-cell", type=int, default=5)
     demo.add_argument("--replay-seeds", type=int, default=12)
+
+    fleet_demo = sub.add_parser(
+        "fleet-demo",
+        help="run the local CPU discrete-event fleet benchmark (not Isaac Sim)",
+    )
+    fleet_demo.add_argument("--output-dir", default="artifacts/fleet-demo")
+    fleet_demo.add_argument("--seeds-per-cell", type=int, default=5)
+    fleet_demo.add_argument("--replay-seeds", type=int, default=12)
 
     sub.add_parser("doctor", help="check local environment and non-secret configuration state")
     sub.add_parser("models", help="list model IDs visible to your Token Factory API key")
@@ -106,6 +115,28 @@ def main() -> int:
         port = int(os.getenv("RESILIANT_PORT", "8000"))
         uvicorn.run("resiliant_z.api:app", host=host, port=port, reload=False)
         return 0
+    if args.command == "fleet-demo":
+        try:
+            summary = run_fleet_demo(
+                output_dir=Path(args.output_dir),
+                seeds_per_cell=args.seeds_per_cell,
+                replay_seeds=args.replay_seeds,
+            )
+        except Exception as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps({
+            "project": summary["project"],
+            "evidence_label": summary["evidence_label"],
+            "backend": summary["backend"],
+            "runs": summary["counts"],
+            "discovery_status": summary["discovery"]["status"],
+            "validation_improvement_fraction": summary["discovery"]["validation_improvement_fraction"],
+            "policy_replay": summary["policy_replay"],
+            "artifacts": str(Path(args.output_dir).resolve()),
+        }, indent=2))
+        print("\nRead report: " + str((Path(args.output_dir) / "report.md").resolve()))
+        return 0 if summary["discovery"]["status"] == "validated" else 2
     if args.command == "demo":
         try:
             summary = run_demo(

@@ -92,6 +92,8 @@ def _build_report(summary: dict, decision: DiscoveryDecision) -> str:
         f"- Interaction-model RMSE (held-out): `{decision.validation_interaction_rmse:.6f}`",
         f"- High-demand × high-priority interaction coefficient: `{decision.interaction_effect:.6f}`",
         f"- Held-out RMSE improvement: `{decision.validation_improvement_fraction:.1%}`",
+        f"- Held-out interaction contrast: `{decision.validation_interaction_effect}`",
+        f"- Held-out interaction 95% CI: `[{decision.validation_interaction_ci_lower}, {decision.validation_interaction_ci_upper}]`",
         "",
         "## Policy replay",
         "",
