@@ -8,7 +8,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from resiliant_z.evidence.analyzer import analyze_discovery
-from resiliant_z.experiments.planner import factorial_manifests, replay_manifests
+from resiliant_z.experiments.planner import (
+    POLICY_BYPASS_CANDIDATES,
+    factorial_manifests,
+    policy_selection_manifests,
+    replay_manifests,
+)
 from resiliant_z.llm.nebius import local_hypotheses
 from resiliant_z.models import SimulationRun
 from resiliant_z.simulation.discrete_event import DiscreteEventFleetSimulator
@@ -52,11 +57,58 @@ def _write_jsonl(path: Path, rows: list[dict]) -> None:
             handle.write(json.dumps(row, sort_keys=True) + "\n")
 
 
+def _select_bypass_ratio(runs: list[SimulationRun]) -> tuple[float, list[dict]]:
+    """Select a treatment using policy-selection seeds only.
+
+    Predeclared lexicographic objective: maximize mean tasks completed during
+    the fixed horizon; break ties by lower end-window queue-growth slope, then
+    by the smallest bypass ratio. The final paired replay uses different seeds.
+    """
+    if not runs:
+        raise ValueError("Cannot select a policy without candidate runs")
+    grouped: dict[float, list[SimulationRun]] = {}
+    for run in runs:
+        ratio = run.experiment.parameters.bypass_ratio
+        grouped.setdefault(ratio, []).append(run)
+
+    candidate_results: list[dict] = []
+    for ratio, candidate_runs in sorted(grouped.items()):
+        waits, wait_samples = _pooled_started_wait(candidate_runs)
+        candidate_results.append(
+            {
+                "bypass_ratio": ratio,
+                "seed_count": len(candidate_runs),
+                "mean_completed_tasks": round(_mean(candidate_runs, "task_completions"), 6),
+                "mean_throughput_tasks_per_min": round(
+                    _mean(candidate_runs, "throughput_tasks_per_min"), 6
+                ),
+                "pooled_started_task_wait_seconds": round(waits, 6),
+                "started_task_wait_sample_count": wait_samples,
+                "mean_queue_growth_per_min": round(
+                    _mean(candidate_runs, "queue_growth_per_min"), 6
+                ),
+            }
+        )
+
+    # The result rows carry the seed count and means used by the declared score.
+    # Lower wait and then lower intervention break ties in that order.
+    winner = min(
+        candidate_results,
+        key=lambda row: (
+            -row["mean_completed_tasks"],
+            row["mean_queue_growth_per_min"],
+            row["bypass_ratio"],
+        ),
+    )
+    return float(winner["bypass_ratio"]), candidate_results
+
+
 def run_fleet_demo(
     output_dir: str | Path = "artifacts/fleet-demo",
     *,
     seeds_per_cell: int = 5,
     replay_seeds: int = 12,
+    policy_selection_seeds: int = 5,
 ) -> dict:
     """Run a seeded CPU queueing model, held-out analysis, and paired policy replay.
 
@@ -67,6 +119,8 @@ def run_fleet_demo(
         raise ValueError("Use at least three seeds per factorial condition")
     if replay_seeds < 3:
         raise ValueError("Use at least three paired replay seeds")
+    if policy_selection_seeds < 3:
+        raise ValueError("Use at least three policy-selection seeds per candidate")
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
     simulator = DiscreteEventFleetSimulator()
@@ -81,8 +135,43 @@ def run_fleet_demo(
     validation_runs = [simulator.run(m) for m in validation_manifests]
     decision = analyze_discovery(discovery_runs, validation_runs, backend="discrete_event")
 
+    # Policy activation is gated by the independently validated interaction.
+    # Candidate selection and final replay use disjoint seed ranges.
+    selection_manifests = []
+    selection_runs: list[SimulationRun] = []
+    candidate_results: list[dict] = []
+    if decision.status == "validated":
+        selection_manifests = policy_selection_manifests(
+            seeds_per_candidate=policy_selection_seeds,
+            first_seed=55_000,
+            bypass_candidates=POLICY_BYPASS_CANDIDATES,
+        )
+        selection_runs = [simulator.run(m) for m in selection_manifests]
+        selected_bypass_ratio, candidate_results = _select_bypass_ratio(selection_runs)
+        selection_status = "selected_after_validated_discovery"
+    else:
+        selected_bypass_ratio = 0.0
+        selection_status = "blocked_because_discovery_was_not_validated"
+
+    policy_selection = {
+        "status": selection_status,
+        "discovery_status": decision.status,
+        "selected_bypass_ratio": selected_bypass_ratio,
+        "candidate_bypass_ratios": list(POLICY_BYPASS_CANDIDATES),
+        "seeds_per_candidate": policy_selection_seeds,
+        "candidate_results": candidate_results,
+        "selection_objective": (
+            "maximize mean tasks completed within the fixed horizon; tie-break by lower end-window "
+            "queue-growth slope; then choose the smaller bypass ratio"
+        ),
+        "seed_protocol": (
+            "all candidates share seeds within policy selection; final paired replay uses a "
+            "disjoint seed range"
+        ),
+    }
+
     manifests = replay_manifests(
-        seeds=range(60_001, 60_001 + replay_seeds), bypass_ratio=0.45
+        seeds=range(60_001, 60_001 + replay_seeds), bypass_ratio=selected_bypass_ratio
     )
     replay_runs = [simulator.run(m) for m in manifests]
     baseline = [r for r in replay_runs if "BASELINE" in r.run_id]
@@ -96,6 +185,7 @@ def run_fleet_demo(
     policy_censored_exposure = _mean(policy, "censored_wait_observation_seconds")
     replay_summary = {
         "paired_seed_count": replay_seeds,
+        "selected_bypass_ratio": selected_bypass_ratio,
         "baseline_mean_throughput": round(base_t, 6),
         "policy_mean_throughput": round(policy_t, 6),
         "throughput_change_percent": round((policy_t - base_t) / max(base_t, 1e-9) * 100, 3),
@@ -117,8 +207,10 @@ def run_fleet_demo(
         "policy_mean_queue_growth": round(_mean(policy, "queue_growth_per_min"), 6),
     }
     hypotheses = local_hypotheses().model_dump(mode="json")
-    all_runs = [*discovery_runs, *validation_runs, *replay_runs]
-    all_manifests = [*discovery_manifests, *validation_manifests, *manifests]
+    all_runs = [*discovery_runs, *validation_runs, *selection_runs, *replay_runs]
+    all_manifests = [
+        *discovery_manifests, *validation_manifests, *selection_manifests, *manifests
+    ]
     summary = {
         "project": "RESILIANT-Z",
         "created_at": datetime.now(UTC).isoformat(),
@@ -134,9 +226,11 @@ def run_fleet_demo(
             "total_runs": len(all_runs),
             "discovery_runs": len(discovery_runs),
             "validation_runs": len(validation_runs),
+            "policy_selection_runs": len(selection_runs),
             "replay_runs": len(replay_runs),
         },
         "discovery": decision.model_dump(mode="json"),
+        "policy_selection": policy_selection,
         "policy_replay": replay_summary,
         "model_assumptions": {
             "robots": simulator.robot_count,
@@ -178,9 +272,30 @@ def run_fleet_demo(
         f"- Held-out interaction 95% CI: `[{decision.validation_interaction_ci_lower:.6f}, {decision.validation_interaction_ci_upper:.6f}]`",
         f"- Relative held-out RMSE improvement: `{decision.validation_improvement_fraction:.1%}`",
         "",
-        "## Paired policy replay",
+        "## Evidence-gated policy selection",
+        "",
+        f"- Selection status: **{policy_selection['status']}**",
+        f"- Discovery gate: `{decision.status}`",
+        f"- Selection runs: `{len(selection_runs)}`",
+        f"- Selected bypass ratio: `{selected_bypass_ratio:.2f}`",
+        f"- Predeclared objective: {policy_selection['selection_objective']}",
+        "- Candidate scores (selection seeds only):",
+        *(
+            [
+                f"  - bypass `{row['bypass_ratio']:.2f}`: completed `{row['mean_completed_tasks']:.2f}` tasks/run; "
+                f"throughput `{row['mean_throughput_tasks_per_min']:.3f}` tasks/min; "
+                f"queue growth `{row['mean_queue_growth_per_min']:.3f}`/min; "
+                f"started-task wait `{row['pooled_started_task_wait_seconds']:.2f}` s"
+                for row in candidate_results
+            ]
+            or ["  - No candidates evaluated because discovery was not validated."]
+        ),
+        "- Policy selection seeds and final replay seeds are disjoint.",
+        "",
+        "## Paired policy replay (held-out seeds)",
         "",
         f"- Paired seeds: {replay_seeds}",
+        f"- Selected bypass ratio evaluated: `{selected_bypass_ratio:.2f}`",
         f"- Baseline throughput: `{base_t:.4f}` tasks/min",
         f"- Bypass-policy throughput: `{policy_t:.4f}` tasks/min",
         f"- Throughput change: `{replay_summary['throughput_change_percent']:.2f}%`",

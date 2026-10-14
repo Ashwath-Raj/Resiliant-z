@@ -48,3 +48,9 @@ Factor levels are configured experiment settings. This test does not discover co
 ## Relationship to Isaac Sim
 
 Both simulator backends are intended to return the shared `SimulationRun` contract. The discrete-event backend is for local software development. The approved university Isaac Sim host must later run a documented scene and export measured telemetry that passes the CSV contract. The Isaac Sim integration is not implemented by this local model.
+
+## Policy-selection protocol
+
+A policy intervention is considered only after the held-out discovery gate returns `validated`. The runner then evaluates the predeclared bypass candidates `(0.00, 0.15, 0.30, 0.45)` on shared policy-selection seeds. It selects the candidate maximizing mean completed tasks within the fixed horizon; ties are broken by lower end-window queue-growth slope and then by the lower bypass ratio. Candidate-selection seeds are separate from the final paired replay seeds. If discovery is `inconclusive` or `rejected`, the intervention is blocked and the selected bypass ratio remains zero.
+
+This is an explicit experimental policy-selection rule, not a learned continuous controller. The candidate list, high-stress operating condition, objective and tie-breaking order are fixed in advance and are recorded in the report. Final replay estimates the selected intervention's effect on new paired seeds.

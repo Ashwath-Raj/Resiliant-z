@@ -1,4 +1,7 @@
-from resiliant_z.experiments.planner import factorial_manifests
+from resiliant_z.experiments.planner import (
+    factorial_manifests,
+    policy_selection_manifests,
+)
 from resiliant_z.models import ExperimentManifest, ExperimentParameters
 from resiliant_z.simulation.discrete_event import DiscreteEventFleetSimulator
 
@@ -71,3 +74,18 @@ def test_wait_metrics_separate_started_tasks_from_right_censored_tasks():
     else:
         assert metrics.average_wait_seconds == 0.0
     assert any("right-censored" in note for note in result.notes)
+
+
+def test_policy_selection_manifests_are_paired_and_bounded():
+    manifests = policy_selection_manifests(seeds_per_candidate=3, first_seed=7000)
+    assert len(manifests) == 12
+    assert {m.stage for m in manifests} == {"policy_selection"}
+    candidates = {m.parameters.bypass_ratio for m in manifests}
+    assert candidates == {0.0, 0.15, 0.30, 0.45}
+    seeds_by_candidate = {
+        ratio: {m.seed for m in manifests if m.parameters.bypass_ratio == ratio}
+        for ratio in candidates
+    }
+    assert len({tuple(sorted(seeds)) for seeds in seeds_by_candidate.values()}) == 1
+    assert all(m.parameters.traffic_demand == 1.05 for m in manifests)
+    assert all(m.parameters.priority_ratio == 0.50 for m in manifests)

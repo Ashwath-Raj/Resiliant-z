@@ -12,6 +12,7 @@ from resiliant_z.simulation.surrogate import current_git_sha
 
 DEMAND_LEVELS = (0.55, 1.05)
 PRIORITY_LEVELS = (0.15, 0.50)
+POLICY_BYPASS_CANDIDATES = (0.0, 0.15, 0.30, 0.45)
 
 
 def factorial_manifests(
@@ -45,6 +46,52 @@ def factorial_manifests(
                         git_sha=sha,
                     )
                 )
+    return manifests
+
+
+def policy_selection_manifests(
+    *,
+    seeds_per_candidate: int = 5,
+    first_seed: int = 55_000,
+    bypass_candidates: Iterable[float] = POLICY_BYPASS_CANDIDATES,
+) -> list[ExperimentManifest]:
+    """Create a paired, high-stress candidate-selection experiment set.
+
+    Every candidate uses the same seed set, so comparisons reuse the same
+    pseudorandom arrival and priority streams. These seeds are distinct from
+    both discovery/validation and final replay seeds.
+    """
+    if seeds_per_candidate < 3:
+        raise ValueError("Use at least three seeds per policy candidate")
+    candidates = tuple(float(value) for value in bypass_candidates)
+    if not candidates:
+        raise ValueError("At least one bypass candidate is required")
+    if len(set(candidates)) != len(candidates):
+        raise ValueError("Bypass candidates must be unique")
+    if any(value < 0.0 or value > 0.5 for value in candidates):
+        raise ValueError("Bypass candidates must be within [0.0, 0.5]")
+    if first_seed < 0:
+        raise ValueError("first_seed must be non-negative")
+
+    sha = current_git_sha()
+    manifests: list[ExperimentManifest] = []
+    for bypass_ratio in candidates:
+        bypass_pct = round(bypass_ratio * 100)
+        for replicate in range(seeds_per_candidate):
+            seed = first_seed + replicate + 1
+            manifests.append(
+                ExperimentManifest(
+                    experiment_id=f"SELECT-B{bypass_pct:02d}-R{replicate + 1:02d}",
+                    stage="policy_selection",
+                    seed=seed,
+                    parameters=ExperimentParameters(
+                        traffic_demand=1.05,
+                        priority_ratio=0.50,
+                        bypass_ratio=bypass_ratio,
+                    ),
+                    git_sha=sha,
+                )
+            )
     return manifests
 
 

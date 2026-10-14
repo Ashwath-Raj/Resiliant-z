@@ -6,7 +6,7 @@ Every run is defined by an `ExperimentManifest` containing:
 
 - unique `experiment_id`
 - versioned `scenario_id`
-- `stage`: discovery, validation, or replay
+- `stage`: discovery, validation, policy_selection, or replay
 - deterministic random `seed`
 - bounded parameters (`traffic_demand`, `priority_ratio`, `bypass_ratio`)
 - source Git SHA

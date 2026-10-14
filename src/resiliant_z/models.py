@@ -27,7 +27,7 @@ class ExperimentManifest(StrictModel):
 
     experiment_id: str = Field(min_length=3, max_length=80, pattern=r"^[A-Za-z0-9_.-]+$")
     scenario_id: str = Field(default="priority_junction_v1", min_length=3, max_length=80)
-    stage: Literal["discovery", "validation", "replay"]
+    stage: Literal["discovery", "validation", "policy_selection", "replay"]
     seed: int = Field(ge=0, le=2**31 - 1)
     parameters: ExperimentParameters
     git_sha: str = "unknown"
