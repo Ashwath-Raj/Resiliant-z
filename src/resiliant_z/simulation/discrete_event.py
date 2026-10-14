@@ -17,6 +17,11 @@ from datetime import UTC, datetime
 from typing import Literal
 
 from resiliant_z.models import ExperimentManifest, ScenarioMetrics, SimulationRun
+from resiliant_z.scenario import (
+    HIGH_DEMAND_THRESHOLD,
+    HIGH_PRIORITY_THRESHOLD,
+    JUNCTION_PRESSURE_TRIGGER,
+)
 
 
 @dataclass(slots=True)
@@ -25,6 +30,11 @@ class _Task:
     arrival_time: float
     is_priority: bool
     route: Literal["junction", "bypass"]
+    route_uniform: float
+    approach_seconds: float
+    junction_service_seconds: float
+    bypass_service_seconds: float
+    return_seconds: float
 
 
 def _git_sha() -> str:
@@ -50,6 +60,11 @@ class DiscreteEventFleetSimulator:
       and completing a task.
     - One junction server is shared by through-traffic. A separate bypass server
       receives the fraction selected by ``bypass_ratio``.
+    - ``routing_policy="static"`` diverts by that ratio across all traffic.
+      ``routing_policy="conditioned"`` permits diversion only when both workload
+      factors are in the predeclared high-risk envelope and observed junction
+      pressure reaches the configured trigger. These are benchmark rules, not
+      learned real-world thresholds.
     - Priority jobs receive queue precedence but use longer service windows to
       represent special handling/clearance. This is an explicit scenario
       assumption, not a claim about every warehouse or robot fleet.
@@ -80,14 +95,34 @@ class DiscreteEventFleetSimulator:
         next_task_id = 0
         while next_arrival <= self.duration_seconds:
             next_task_id += 1
-            route: Literal["junction", "bypass"] = (
-                "bypass" if rng.random() < p.bypass_ratio else "junction"
+            # Pre-sample all per-task randomness before simulating. This keeps
+            # arrivals, task classes, route uniforms, and service-time draws paired
+            # across policy arms with the same workload and seed (common random
+            # numbers), instead of letting a policy change the RNG draw order.
+            route_uniform = rng.random()
+            is_priority = rng.random() < p.priority_ratio
+            approach_seconds = rng.uniform(2.0, 4.0)
+            junction_service_seconds = (
+                rng.triangular(5.2, 8.0, 6.5)
+                if is_priority
+                else rng.triangular(3.2, 5.8, 4.2)
             )
+            bypass_service_seconds = (
+                rng.triangular(3.0, 5.1, 4.0)
+                if is_priority
+                else rng.triangular(1.8, 3.7, 2.7)
+            )
+            return_seconds = rng.uniform(3.0, 6.0)
             task = _Task(
                 task_id=next_task_id,
                 arrival_time=next_arrival,
-                is_priority=rng.random() < p.priority_ratio,
-                route=route,
+                is_priority=is_priority,
+                route="junction",
+                route_uniform=route_uniform,
+                approach_seconds=approach_seconds,
+                junction_service_seconds=junction_service_seconds,
+                bypass_service_seconds=bypass_service_seconds,
+                return_seconds=return_seconds,
             )
             schedule(next_arrival, "arrival", task)
             next_arrival += rng.expovariate(arrival_rate)
@@ -105,6 +140,9 @@ class DiscreteEventFleetSimulator:
         arrived_tasks: dict[int, _Task] = {}
         backlog_samples: list[tuple[float, int]] = [(0.0, 0)]
         junction_busy_seconds = 0.0
+        bypass_task_count = 0
+        high_risk_context_arrival_count = 0
+        conditional_policy_trigger_count = 0
 
         def pop_priority(queue: list[_Task]) -> _Task:
             # Higher-priority jobs are selected first; ties are FIFO by arrival.
@@ -122,8 +160,7 @@ class DiscreteEventFleetSimulator:
                     return
                 task = pop_priority(robot_queue)
                 robot_busy[robot_id] = True
-                approach = rng.uniform(2.0, 4.0)
-                schedule(now + approach, "approach_done", (robot_id, task))
+                schedule(now + task.approach_seconds, "approach_done", (robot_id, task))
 
         # Map task to its robot from assignment through route completion.
         robot_id_for_task: dict[int, int] = {}
@@ -134,18 +171,9 @@ class DiscreteEventFleetSimulator:
             task = pop_priority(route_queues[route])
             route_busy[route] = True
             service_waits[task.task_id] = max(0.0, now - task.arrival_time)
-            if route == "junction":
-                service_seconds = (
-                    rng.triangular(5.2, 8.0, 6.5)
-                    if task.is_priority
-                    else rng.triangular(3.2, 5.8, 4.2)
-                )
-            else:
-                service_seconds = (
-                    rng.triangular(3.0, 5.1, 4.0)
-                    if task.is_priority
-                    else rng.triangular(1.8, 3.7, 2.7)
-                )
+            service_seconds = (
+                task.junction_service_seconds if route == "junction" else task.bypass_service_seconds
+            )
             if route == "junction":
                 nonlocal junction_busy_seconds
                 junction_busy_seconds += max(
@@ -164,6 +192,28 @@ class DiscreteEventFleetSimulator:
                 assert isinstance(task, _Task)
                 arrivals += 1
                 arrived_tasks[task.task_id] = task
+                high_risk_context = (
+                    p.traffic_demand >= HIGH_DEMAND_THRESHOLD
+                    and p.priority_ratio >= HIGH_PRIORITY_THRESHOLD
+                )
+                if high_risk_context:
+                    high_risk_context_arrival_count += 1
+                junction_pressure = len(route_queues["junction"]) + int(route_busy["junction"])
+                condition_active = (
+                    p.routing_policy == "conditioned"
+                    and p.bypass_ratio > 0.0
+                    and high_risk_context
+                    and junction_pressure >= JUNCTION_PRESSURE_TRIGGER
+                )
+                if condition_active:
+                    conditional_policy_trigger_count += 1
+                use_bypass = (
+                    task.route_uniform < p.bypass_ratio
+                    and (p.routing_policy == "static" or condition_active)
+                )
+                task.route = "bypass" if use_bypass else "junction"
+                if use_bypass:
+                    bypass_task_count += 1
                 robot_queue.append(task)
                 dispatch_robots(now)
             elif kind == "approach_done":
@@ -176,7 +226,7 @@ class DiscreteEventFleetSimulator:
                 route, robot_id, task = payload  # type: ignore[misc]
                 route_busy[route] = False
                 # The robot remains busy through a short delivery/return phase.
-                schedule(now + rng.uniform(3.0, 6.0), "robot_free", (robot_id, task))
+                schedule(now + task.return_seconds, "robot_free", (robot_id, task))
                 start_route(route, now)
             elif kind == "robot_free":
                 robot_id, _task = payload  # type: ignore[misc]
@@ -239,6 +289,9 @@ class DiscreteEventFleetSimulator:
             tasks_not_started_by_horizon=tasks_not_started_by_horizon,
             route_service_wait_total_seconds=round(route_service_wait_total, 6),
             censored_wait_observation_seconds=round(censored_wait_observation, 6),
+            bypass_task_count=bypass_task_count,
+            high_risk_context_arrival_count=high_risk_context_arrival_count,
+            conditional_policy_trigger_count=conditional_policy_trigger_count,
         )
         return SimulationRun(
             run_id=f"{manifest.experiment_id}-seed-{manifest.seed}",
@@ -249,6 +302,8 @@ class DiscreteEventFleetSimulator:
             notes=[
                 "CPU-only discrete-event queueing model; not NVIDIA Isaac Sim or a physics-based digital twin.",
                 "Priority tasks receive queue precedence and longer service windows by explicit scenario assumption.",
+                f"Routing policy: {p.routing_policy}; bypass ratio: {p.bypass_ratio:.2f}; actual bypass tasks: {bypass_task_count}; conditional triggers: {conditional_policy_trigger_count}.",
+                "Task-level random variates are pre-sampled to improve paired-policy comparability (common random numbers).",
                 "No geometry, collision, sensor, or deadlock model; deadlock_events=0 is not a safety result.",
                 "average_wait_seconds is arrival-to-route-service-start wait among tasks whose route service began before the horizon; unfinished waits are excluded.",
                 "tasks_not_started_by_horizon counts right-censored tasks; censored_wait_observation_seconds is a separate horizon-limited descriptive metric, not a completed-wait mean.",

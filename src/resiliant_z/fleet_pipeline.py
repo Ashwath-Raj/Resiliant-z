@@ -10,9 +10,10 @@ from pathlib import Path
 from resiliant_z.evidence.analyzer import analyze_discovery
 from resiliant_z.experiments.planner import (
     POLICY_BYPASS_CANDIDATES,
+    REPLAY_CONDITIONS,
     factorial_manifests,
+    policy_comparison_manifests,
     policy_selection_manifests,
-    replay_manifests,
 )
 from resiliant_z.llm.nebius import local_hypotheses
 from resiliant_z.models import SimulationRun
@@ -44,6 +45,144 @@ def _task_counts(runs: list[SimulationRun]) -> dict[str, float | int]:
         "route_service_started": started,
         "not_started_by_horizon": not_started,
         "not_started_fraction": not_started / arrivals if arrivals else 0.0,
+    }
+
+
+def _t_critical_975(degrees_of_freedom: int) -> float:
+    """Two-sided 95% Student-t critical values for small paired samples."""
+    table = {
+        1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571,
+        6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228,
+        11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145, 15: 2.131,
+        16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086,
+        21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060,
+        26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045,
+    }
+    return table.get(degrees_of_freedom, 1.96 if degrees_of_freedom >= 30 else 12.706)
+
+
+def _paired_delta(
+    baseline: list[SimulationRun], treatment: list[SimulationRun], metric: str
+) -> dict:
+    """Paired per-seed differences and t interval; positive means treatment minus baseline."""
+    baseline_by_seed = {run.experiment.seed: run for run in baseline}
+    treatment_by_seed = {run.experiment.seed: run for run in treatment}
+    common_seeds = sorted(baseline_by_seed.keys() & treatment_by_seed.keys())
+    if len(common_seeds) < 3:
+        raise ValueError("Paired replay comparisons require at least three common seeds")
+
+    def value(run: SimulationRun) -> float:
+        if metric == "completion_fraction":
+            arrivals = run.metrics.task_arrivals or 0
+            completions = run.metrics.task_completions or 0
+            return completions / arrivals if arrivals else 0.0
+        return float(getattr(run.metrics, metric))
+
+    differences = [
+        value(treatment_by_seed[seed]) - value(baseline_by_seed[seed])
+        for seed in common_seeds
+    ]
+    mean_delta = statistics.fmean(differences)
+    sample_variance = sum((item - mean_delta) ** 2 for item in differences) / (len(differences) - 1)
+    standard_error = (sample_variance / len(differences)) ** 0.5
+    margin = _t_critical_975(len(differences) - 1) * standard_error
+    return {
+        "paired_seed_count": len(differences),
+        "mean_delta_treatment_minus_baseline": round(mean_delta, 6),
+        "ci95_low": round(mean_delta - margin, 6),
+        "ci95_high": round(mean_delta + margin, 6),
+        "metric": metric,
+    }
+
+
+def _arm_summary(runs: list[SimulationRun]) -> dict:
+    task_counts = _task_counts(runs)
+    started_wait, started_wait_samples = _pooled_started_wait(runs)
+    return {
+        "run_count": len(runs),
+        "mean_throughput_tasks_per_min": round(_mean(runs, "throughput_tasks_per_min"), 6),
+        "mean_started_task_wait_seconds": round(started_wait, 6),
+        "started_task_wait_sample_count": started_wait_samples,
+        "mean_queue_growth_per_min": round(_mean(runs, "queue_growth_per_min"), 6),
+        "task_counts": task_counts,
+        "bypass_tasks_total": sum(run.metrics.bypass_task_count or 0 for run in runs),
+        "high_risk_context_arrivals_total": sum(
+            run.metrics.high_risk_context_arrival_count or 0 for run in runs
+        ),
+        "conditional_policy_triggers_total": sum(
+            run.metrics.conditional_policy_trigger_count or 0 for run in runs
+        ),
+        "mean_censored_wait_observation_seconds": round(
+            _mean(runs, "censored_wait_observation_seconds"), 6
+        ),
+    }
+
+
+def _summarize_policy_comparison(
+    runs: list[SimulationRun], *, replay_seeds: int, selected_bypass_ratio: float
+) -> dict:
+    """Summarize three policies under nominal and high-risk operating conditions."""
+    result: dict[str, dict] = {}
+    for condition_name, condition in REPLAY_CONDITIONS.items():
+        condition_runs = [run for run in runs if run.experiment.scenario_id == condition["scenario_id"]]
+        by_arm: dict[str, list[SimulationRun]] = {"baseline": [], "static": [], "conditioned": []}
+        for run in condition_runs:
+            parts = run.experiment.experiment_id.split("-")
+            if len(parts) < 4 or parts[0] != "REPLAY":
+                raise ValueError(f"Unexpected replay ID: {run.experiment.experiment_id}")
+            arm = parts[2].lower()
+            if arm not in by_arm:
+                raise ValueError(f"Unknown policy arm {arm!r} in {run.experiment.experiment_id}")
+            by_arm[arm].append(run)
+        for arm, arm_runs in by_arm.items():
+            if len(arm_runs) != replay_seeds:
+                raise ValueError(
+                    f"Expected {replay_seeds} runs for {condition_name}/{arm}; got {len(arm_runs)}"
+                )
+
+        comparisons: dict[str, dict] = {}
+        pairs = (
+            ("static_vs_baseline", "static", "baseline"),
+            ("conditioned_vs_baseline", "conditioned", "baseline"),
+            ("conditioned_vs_static", "conditioned", "static"),
+        )
+        for comparison_name, treatment_arm, baseline_arm in pairs:
+            comparisons[comparison_name] = {
+                metric: _paired_delta(by_arm[baseline_arm], by_arm[treatment_arm], metric)
+                for metric in (
+                    "throughput_tasks_per_min",
+                    "completion_fraction",
+                    "average_wait_seconds",
+                    "queue_growth_per_min",
+                )
+            }
+
+        result[condition_name] = {
+            "scenario_id": condition["scenario_id"],
+            "traffic_demand": condition["traffic_demand"],
+            "priority_ratio": condition["priority_ratio"],
+            "policies": {arm: _arm_summary(arm_runs) for arm, arm_runs in by_arm.items()},
+            "paired_comparisons": comparisons,
+            "conditioned_activation": {
+                "eligible_high_risk_arrivals": sum(
+                    run.metrics.high_risk_context_arrival_count or 0 for run in by_arm["conditioned"]
+                ),
+                "junction_pressure_triggers": sum(
+                    run.metrics.conditional_policy_trigger_count or 0 for run in by_arm["conditioned"]
+                ),
+                "actual_bypass_tasks": sum(
+                    run.metrics.bypass_task_count or 0 for run in by_arm["conditioned"]
+                ),
+            },
+        }
+    return {
+        "paired_seed_count_per_condition": replay_seeds,
+        "selected_bypass_ratio": selected_bypass_ratio,
+        "conditions": result,
+        "comparison_protocol": (
+            "baseline, static-control and discovery-conditioned arms use paired seeds within each "
+            "condition; policy-selection seeds are disjoint from replay seeds"
+        ),
     }
 
 
@@ -170,42 +309,16 @@ def run_fleet_demo(
         ),
     }
 
-    manifests = replay_manifests(
-        seeds=range(60_001, 60_001 + replay_seeds), bypass_ratio=selected_bypass_ratio
+    manifests = policy_comparison_manifests(
+        seeds=range(60_001, 60_001 + replay_seeds),
+        selected_bypass_ratio=selected_bypass_ratio,
     )
     replay_runs = [simulator.run(m) for m in manifests]
-    baseline = [r for r in replay_runs if "BASELINE" in r.run_id]
-    policy = [r for r in replay_runs if "POLICY" in r.run_id]
-    base_t, policy_t = _mean(baseline, "throughput_tasks_per_min"), _mean(policy, "throughput_tasks_per_min")
-    base_w, base_wait_samples = _pooled_started_wait(baseline)
-    policy_w, policy_wait_samples = _pooled_started_wait(policy)
-    baseline_counts = _task_counts(baseline)
-    policy_counts = _task_counts(policy)
-    baseline_censored_exposure = _mean(baseline, "censored_wait_observation_seconds")
-    policy_censored_exposure = _mean(policy, "censored_wait_observation_seconds")
-    replay_summary = {
-        "paired_seed_count": replay_seeds,
-        "selected_bypass_ratio": selected_bypass_ratio,
-        "baseline_mean_throughput": round(base_t, 6),
-        "policy_mean_throughput": round(policy_t, 6),
-        "throughput_change_percent": round((policy_t - base_t) / max(base_t, 1e-9) * 100, 3),
-        "baseline_mean_wait_seconds": round(base_w, 6),
-        "policy_mean_wait_seconds": round(policy_w, 6),
-        "baseline_wait_sample_count": base_wait_samples,
-        "policy_wait_sample_count": policy_wait_samples,
-        "wait_change_percent": round((policy_w - base_w) / max(base_w, 1e-9) * 100, 3),
-        "baseline_censored_wait_observation_seconds": round(baseline_censored_exposure, 6),
-        "policy_censored_wait_observation_seconds": round(policy_censored_exposure, 6),
-        "censored_wait_observation_change_percent": round(
-            (policy_censored_exposure - baseline_censored_exposure)
-            / max(baseline_censored_exposure, 1e-9) * 100,
-            3,
-        ),
-        "baseline_task_counts": baseline_counts,
-        "policy_task_counts": policy_counts,
-        "baseline_mean_queue_growth": round(_mean(baseline, "queue_growth_per_min"), 6),
-        "policy_mean_queue_growth": round(_mean(policy, "queue_growth_per_min"), 6),
-    }
+    replay_summary = _summarize_policy_comparison(
+        replay_runs,
+        replay_seeds=replay_seeds,
+        selected_bypass_ratio=selected_bypass_ratio,
+    )
     hypotheses = local_hypotheses().model_dump(mode="json")
     all_runs = [*discovery_runs, *validation_runs, *selection_runs, *replay_runs]
     all_manifests = [
@@ -237,6 +350,9 @@ def run_fleet_demo(
             "duration_seconds": simulator.duration_seconds,
             "arrivals": "Poisson process at 0.20 * traffic_demand tasks/second",
             "priority_effect": "priority-first service order with longer service windows",
+            "conditional_policy": "bypass only when demand and priority are in the predefined high-risk envelope and junction queue pressure reaches the trigger",
+            "policy_thresholds": "predeclared midpoints between factorial design levels, not discovered thresholds",
+            "paired_randomness": "per-task random variates are pre-sampled for policy comparisons",
             "geometry_and_collisions": "not modelled",
             "deadlocks": "not modelled; reported zero is not a safety result",
         },
@@ -292,27 +408,56 @@ def run_fleet_demo(
         ),
         "- Policy selection seeds and final replay seeds are disjoint.",
         "",
-        "## Paired policy replay (held-out seeds)",
+        "## Three-policy comparison on held-out paired seeds",
         "",
-        f"- Paired seeds: {replay_seeds}",
-        f"- Selected bypass ratio evaluated: `{selected_bypass_ratio:.2f}`",
-        f"- Baseline throughput: `{base_t:.4f}` tasks/min",
-        f"- Bypass-policy throughput: `{policy_t:.4f}` tasks/min",
-        f"- Throughput change: `{replay_summary['throughput_change_percent']:.2f}%`",
-        f"- Baseline pooled arrival-to-route-start wait (tasks that started service): `{base_w:.2f}` seconds across {base_wait_samples} task samples",
-        f"- Policy pooled arrival-to-route-start wait (tasks that started service): `{policy_w:.2f}` seconds across {policy_wait_samples} task samples",
-        f"- Started-task wait change: `{replay_summary['wait_change_percent']:.2f}%`",
-        f"- Baseline tasks: {int(baseline_counts['arrivals'])} arrivals; {int(baseline_counts['completions'])} completed; {int(baseline_counts['route_service_started'])} started route service; {int(baseline_counts['not_started_by_horizon'])} not started by horizon ({baseline_counts['not_started_fraction']:.1%}).",
-        f"- Policy tasks: {int(policy_counts['arrivals'])} arrivals; {int(policy_counts['completions'])} completed; {int(policy_counts['route_service_started'])} started route service; {int(policy_counts['not_started_by_horizon'])} not started by horizon ({policy_counts['not_started_fraction']:.1%}).",
-        f"- Baseline censored wait-observation mean (all arrivals, horizon-limited): `{baseline_censored_exposure:.2f}` seconds",
-        f"- Policy censored wait-observation mean (all arrivals, horizon-limited): `{policy_censored_exposure:.2f}` seconds",
-        f"- Censored wait-observation change (descriptive only): `{replay_summary['censored_wait_observation_change_percent']:.2f}%`",
+        f"- Paired seeds per operating condition: `{replay_seeds}`",
+        f"- Selected static bypass ratio: `{selected_bypass_ratio:.2f}`",
+        "- Policy arms: baseline (no bypass), static control (selected ratio always eligible), and discovery-conditioned (same ratio only when the validated high-risk envelope and live junction-pressure trigger are both present).",
+        "- Operating-envelope thresholds are midpoints between the predefined factorial levels; they are not claimed to be discovered thresholds.",
+        "- Static-control selection uses high-risk policy-selection runs only; all final replay seeds are disjoint from selection seeds.",
         "",
+    ]
+    for condition_name, condition_result in replay_summary["conditions"].items():
+        lines.extend([
+            f"### {condition_name.replace('_', ' ').title()} condition",
+            "",
+            f"- Workload: traffic demand `{condition_result['traffic_demand']}`, priority ratio `{condition_result['priority_ratio']}`.",
+            "- Policy metrics (means across paired seeds):",
+        ])
+        for arm_name, arm_result in condition_result["policies"].items():
+            task_counts = arm_result["task_counts"]
+            lines.append(
+                f"  - **{arm_name}**: throughput `{arm_result['mean_throughput_tasks_per_min']:.3f}` tasks/min; "
+                f"started-task wait `{arm_result['mean_started_task_wait_seconds']:.2f}` s "
+                f"(n={arm_result['started_task_wait_sample_count']} tasks); "
+                f"completion `{task_counts['completions']}/{task_counts['arrivals']}` "
+                f"({task_counts['completion_fraction']:.1%}); "
+                f"queue growth `{arm_result['mean_queue_growth_per_min']:.3f}`/min; "
+                f"bypass tasks `{arm_result['bypass_tasks_total']}`; "
+                f"conditional triggers `{arm_result['conditional_policy_triggers_total']}`."
+            )
+        lines.append("- Paired treatment-minus-baseline differences (95% Student-t intervals):")
+        for comparison_name, metrics in condition_result["paired_comparisons"].items():
+            lines.append(f"  - **{comparison_name}**:")
+            for metric_name, stats in metrics.items():
+                lines.append(
+                    f"    - `{metric_name}`: mean delta `{stats['mean_delta_treatment_minus_baseline']:.4f}`; "
+                    f"95% CI `[{stats['ci95_low']:.4f}, {stats['ci95_high']:.4f}]` (n={stats['paired_seed_count']})."
+                )
+        activation = condition_result["conditioned_activation"]
+        lines.extend([
+            f"- Conditioned policy counters: `{activation['eligible_high_risk_arrivals']}` high-risk-envelope arrivals, "
+            f"`{activation['junction_pressure_triggers']}` pressure triggers, "
+            f"`{activation['actual_bypass_tasks']}` actual bypass tasks.",
+            "",
+        ])
+    lines.extend([
         "## Explicit limitations",
         "",
         *[f"- {item}" for item in decision.limitations],
         "- The queueing model contains explicit scenario assumptions; outcomes cannot be generalized to physical robots without Isaac Sim validation.",
+        "- Policy-condition thresholds are predeclared design midpoints, not learned thresholds.",
         "- This benchmark does not call Token Factory and does not require a GPU.",
-    ]
+    ])
     (output / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return summary

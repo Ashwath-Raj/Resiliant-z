@@ -24,7 +24,7 @@ def test_demo_writes_artifacts_and_labels_surrogate_honestly(tmp_path):
     assert data["hypothesis_generation"]["source"] == "local_baseline"
 
 
-def test_local_fleet_demo_labels_discrete_event_not_isaac(tmp_path):
+def test_local_fleet_demo_compares_three_policies_in_two_conditions(tmp_path):
     from resiliant_z.fleet_pipeline import run_fleet_demo
 
     summary = run_fleet_demo(
@@ -37,27 +37,46 @@ def test_local_fleet_demo_labels_discrete_event_not_isaac(tmp_path):
     assert summary["counts"]["discovery_runs"] == 20
     assert summary["counts"]["validation_runs"] == 20
     assert summary["counts"]["policy_selection_runs"] == 20
-    assert summary["counts"]["replay_runs"] == 6
+    assert summary["counts"]["replay_runs"] == 18
     assert summary["policy_selection"]["status"] == "selected_after_validated_discovery"
     selected_ratio = summary["policy_selection"]["selected_bypass_ratio"]
     assert selected_ratio in {0.0, 0.15, 0.30, 0.45}
-    assert summary["policy_replay"]["selected_bypass_ratio"] == selected_ratio
+    replay = summary["policy_replay"]
+    assert replay["selected_bypass_ratio"] == selected_ratio
+    assert set(replay["conditions"]) == {"nominal", "high_risk"}
+    for condition in replay["conditions"].values():
+        assert set(condition["policies"]) == {"baseline", "static", "conditioned"}
+        assert set(condition["paired_comparisons"]) == {
+            "static_vs_baseline", "conditioned_vs_baseline", "conditioned_vs_static"
+        }
+        assert condition["paired_comparisons"]["conditioned_vs_baseline"][
+            "throughput_tasks_per_min"
+        ]["paired_seed_count"] == 3
+
     manifests = [
         json.loads(line)
         for line in (tmp_path / "fleet" / "manifests.jsonl").read_text().splitlines()
     ]
-    selected_seeds = {m["seed"] for m in manifests if m["stage"] == "policy_selection"}
+    selection_seeds = {m["seed"] for m in manifests if m["stage"] == "policy_selection"}
     replay_seeds = {m["seed"] for m in manifests if m["stage"] == "replay"}
-    assert selected_seeds.isdisjoint(replay_seeds)
-    for seed in replay_seeds:
-        pair = [m for m in manifests if m["stage"] == "replay" and m["seed"] == seed]
-        assert len(pair) == 2
-        assert {m["parameters"]["bypass_ratio"] for m in pair} == {0.0, selected_ratio}
-    assert (tmp_path / "fleet" / "report.md").is_file()
+    assert selection_seeds.isdisjoint(replay_seeds)
+    for scenario in {m["scenario_id"] for m in manifests if m["stage"] == "replay"}:
+        scenario_runs = [m for m in manifests if m["stage"] == "replay" and m["scenario_id"] == scenario]
+        for seed in replay_seeds:
+            pair = [m for m in scenario_runs if m["seed"] == seed]
+            assert len(pair) == 3
+            assert {m["experiment_id"].split("-")[2].lower() for m in pair} == {
+                "baseline", "static", "conditioned"
+            }
+            ratios = {m["experiment_id"].split("-")[2].lower(): m["parameters"]["bypass_ratio"] for m in pair}
+            assert ratios["baseline"] == 0.0
+            assert ratios["static"] == selected_ratio
+            assert ratios["conditioned"] == selected_ratio
     text = (tmp_path / "fleet" / "report.md").read_text()
-    assert "queueing model" in text
-    assert "Evidence-gated policy selection" in text
-    assert "held-out seeds" in text
+    assert "Three-policy comparison" in text
+    assert "Nominal condition" in text
+    assert "High Risk condition" in text
+    assert "NOT ISAAC SIM" in text
 
 
 def test_unvalidated_discovery_blocks_policy_activation(monkeypatch, tmp_path):
@@ -90,3 +109,8 @@ def test_unvalidated_discovery_blocks_policy_activation(monkeypatch, tmp_path):
     assert summary["counts"]["policy_selection_runs"] == 0
     assert summary["policy_selection"]["selected_bypass_ratio"] == 0.0
     assert summary["policy_replay"]["selected_bypass_ratio"] == 0.0
+    assert summary["counts"]["replay_runs"] == 18
+    for condition in summary["policy_replay"]["conditions"].values():
+        assert condition["policies"]["static"]["bypass_tasks_total"] == 0
+        assert condition["policies"]["conditioned"]["bypass_tasks_total"] == 0
+        assert condition["policies"]["conditioned"]["conditional_policy_triggers_total"] == 0

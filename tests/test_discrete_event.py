@@ -1,5 +1,6 @@
 from resiliant_z.experiments.planner import (
     factorial_manifests,
+    policy_comparison_manifests,
     policy_selection_manifests,
 )
 from resiliant_z.models import ExperimentManifest, ExperimentParameters
@@ -89,3 +90,84 @@ def test_policy_selection_manifests_are_paired_and_bounded():
     assert len({tuple(sorted(seeds)) for seeds in seeds_by_candidate.values()}) == 1
     assert all(m.parameters.traffic_demand == 1.05 for m in manifests)
     assert all(m.parameters.priority_ratio == 0.50 for m in manifests)
+
+
+def test_conditioned_policy_requires_high_risk_envelope_and_live_junction_pressure():
+    sim = DiscreteEventFleetSimulator()
+    high_risk = ExperimentManifest(
+        experiment_id="DES-CONDITIONED-HIGH",
+        stage="replay",
+        seed=20261014,
+        scenario_id="priority_junction_high_risk_v1",
+        parameters=ExperimentParameters(
+            traffic_demand=1.05,
+            priority_ratio=0.50,
+            bypass_ratio=0.45,
+            routing_policy="conditioned",
+        ),
+    )
+    high_result = sim.run(high_risk)
+    assert high_result.metrics.high_risk_context_arrival_count > 0
+    assert high_result.metrics.conditional_policy_trigger_count > 0
+    assert high_result.metrics.bypass_task_count > 0
+
+    nominal = high_risk.model_copy(
+        update={
+            "experiment_id": "DES-CONDITIONED-NOMINAL",
+            "scenario_id": "priority_junction_nominal_v1",
+            "seed": 20261015,
+            "parameters": ExperimentParameters(
+                traffic_demand=0.55,
+                priority_ratio=0.15,
+                bypass_ratio=0.45,
+                routing_policy="conditioned",
+            ),
+        }
+    )
+    nominal_result = sim.run(nominal)
+    assert nominal_result.metrics.high_risk_context_arrival_count == 0
+    assert nominal_result.metrics.conditional_policy_trigger_count == 0
+    assert nominal_result.metrics.bypass_task_count == 0
+
+
+def test_static_policy_can_divert_in_nominal_context_but_conditioned_policy_cannot():
+    sim = DiscreteEventFleetSimulator()
+    common = {
+        "stage": "replay",
+        "seed": 61001,
+        "scenario_id": "priority_junction_nominal_v1",
+    }
+    static = ExperimentManifest(
+        experiment_id="DES-STATIC-NOMINAL",
+        **common,
+        parameters=ExperimentParameters(
+            traffic_demand=0.55,
+            priority_ratio=0.15,
+            bypass_ratio=0.45,
+            routing_policy="static",
+        ),
+    )
+    conditioned = ExperimentManifest(
+        experiment_id="DES-CONDITIONED-NOMINAL",
+        **common,
+        parameters=ExperimentParameters(
+            traffic_demand=0.55,
+            priority_ratio=0.15,
+            bypass_ratio=0.45,
+            routing_policy="conditioned",
+        ),
+    )
+    static_result = sim.run(static)
+    conditioned_result = sim.run(conditioned)
+    assert static_result.metrics.bypass_task_count > 0
+    assert conditioned_result.metrics.bypass_task_count == 0
+
+
+def test_policy_arms_share_task_workload_for_same_condition_and_seed():
+    sim = DiscreteEventFleetSimulator()
+    manifests = policy_comparison_manifests(seeds=[62001], selected_bypass_ratio=0.30)
+    high = [m for m in manifests if m.scenario_id == "priority_junction_high_risk_v1"]
+    results = [sim.run(m) for m in high]
+    assert len(results) == 3
+    assert len({run.metrics.task_arrivals for run in results}) == 1
+    assert len({run.metrics.high_risk_context_arrival_count for run in results}) == 1

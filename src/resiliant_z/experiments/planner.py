@@ -13,6 +13,19 @@ from resiliant_z.simulation.surrogate import current_git_sha
 DEMAND_LEVELS = (0.55, 1.05)
 PRIORITY_LEVELS = (0.15, 0.50)
 POLICY_BYPASS_CANDIDATES = (0.0, 0.15, 0.30, 0.45)
+REPLAY_CONDITIONS = {
+    # Thresholds are design-cell representatives. They are not fitted cut-points.
+    "nominal": {
+        "scenario_id": "priority_junction_nominal_v1",
+        "traffic_demand": 0.55,
+        "priority_ratio": 0.15,
+    },
+    "high_risk": {
+        "scenario_id": "priority_junction_high_risk_v1",
+        "traffic_demand": 1.05,
+        "priority_ratio": 0.50,
+    },
+}
 
 
 def factorial_manifests(
@@ -88,10 +101,56 @@ def policy_selection_manifests(
                         traffic_demand=1.05,
                         priority_ratio=0.50,
                         bypass_ratio=bypass_ratio,
+                        routing_policy="static",
                     ),
                     git_sha=sha,
                 )
             )
+    return manifests
+
+
+def policy_comparison_manifests(
+    *, seeds: Iterable[int], selected_bypass_ratio: float
+) -> list[ExperimentManifest]:
+    """Create paired baseline/static/conditioned comparisons in nominal and high-risk contexts."""
+    if not 0.0 <= selected_bypass_ratio <= 0.5:
+        raise ValueError("selected_bypass_ratio must be within [0.0, 0.5]")
+
+    sha = current_git_sha()
+    manifests: list[ExperimentManifest] = []
+    arms = (
+        ("baseline", 0.0, "static"),
+        ("static", selected_bypass_ratio, "static"),
+        ("conditioned", selected_bypass_ratio, "conditioned"),
+    )
+    seed_values = tuple(int(seed) for seed in seeds)
+    if not seed_values:
+        raise ValueError("At least one paired replay seed is required")
+    if any(seed < 0 for seed in seed_values):
+        raise ValueError("Replay seeds must be non-negative")
+    if len(set(seed_values)) != len(seed_values):
+        raise ValueError("Replay seeds must be unique")
+
+    for condition_name, condition in REPLAY_CONDITIONS.items():
+        for seed in seed_values:
+            for arm, bypass_ratio, routing_policy in arms:
+                manifests.append(
+                    ExperimentManifest(
+                        experiment_id=(
+                            f"REPLAY-{condition_name.upper()}-{arm.upper()}-S{seed}"
+                        ),
+                        scenario_id=condition["scenario_id"],
+                        stage="replay",
+                        seed=seed,
+                        parameters=ExperimentParameters(
+                            traffic_demand=condition["traffic_demand"],
+                            priority_ratio=condition["priority_ratio"],
+                            bypass_ratio=bypass_ratio,
+                            routing_policy=routing_policy,
+                        ),
+                        git_sha=sha,
+                    )
+                )
     return manifests
 
 

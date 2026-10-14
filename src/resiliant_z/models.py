@@ -19,7 +19,11 @@ class ExperimentParameters(StrictModel):
 
     traffic_demand: float = Field(ge=0.4, le=1.2, description="Normalized workload multiplier used by the controlled scenario")
     priority_ratio: float = Field(ge=0.1, le=0.6, description="Fraction of priority tasks")
-    bypass_ratio: float = Field(ge=0.0, le=0.5, description="Fraction of traffic diverted from the junction")
+    bypass_ratio: float = Field(ge=0.0, le=0.5, description="Maximum/probabilistic fraction diverted when routing policy permits")
+    routing_policy: Literal["static", "conditioned"] = Field(
+        default="static",
+        description="Static diversion or diversion gated by the validated operating envelope and live junction pressure",
+    )
 
 
 class ExperimentManifest(StrictModel):
@@ -59,6 +63,9 @@ class ScenarioMetrics(StrictModel):
     tasks_not_started_by_horizon: int | None = Field(default=None, ge=0)
     route_service_wait_total_seconds: float | None = Field(default=None, ge=0)
     censored_wait_observation_seconds: float | None = Field(default=None, ge=0)
+    bypass_task_count: int | None = Field(default=None, ge=0)
+    high_risk_context_arrival_count: int | None = Field(default=None, ge=0)
+    conditional_policy_trigger_count: int | None = Field(default=None, ge=0)
 
 
 class SimulationRun(StrictModel):
