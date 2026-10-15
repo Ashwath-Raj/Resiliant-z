@@ -82,6 +82,14 @@ The default experiment uses 20 discovery runs and 20 held-out validation runs. I
 
 Artifacts are written to `artifacts/fleet-demo/`. This mode is completely local and does not call Token Factory or provision GPU compute.
 
+To test how sensitive routing outcomes are to the assumed bypass detour cost, run the paired six-level sweep (0, 2.5, 5, 10, 20 and 30 simulated seconds) on both nominal and high-risk conditions:
+
+```bash
+.venv/bin/resiliant fleet-sensitivity
+```
+
+The command holds the currently selected bypass ratio fixed at `0.45` so it isolates detour-cost sensitivity rather than re-tuning the policy. Results go to `artifacts/fleet-sensitivity/` (`report.md`, `summary.json`, `sensitivity.csv`, and run/manifests JSONL files). Use `--replay-seeds 3` for a fast smoke test, not a final inference run. This experiment is CPU-only and is **not Isaac Sim evidence**.
+
 ## Run the browser dashboard
 
 ```bash

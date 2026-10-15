@@ -64,3 +64,16 @@ This is an explicit experimental policy-selection rule, not a learned continuous
 The benchmark compares baseline (zero bypass), a static control using the selected bypass ratio, and a discovery-conditioned policy. It evaluates two fixed workload contexts: nominal (`traffic_demand=0.55`, `priority_ratio=0.15`) and high-risk (`1.05`, `0.50`). Each policy arm shares a seed within a condition, with per-task random variates pre-sampled so policy-dependent event ordering does not change the exogenous workload or service-time draws. Selection seeds are disjoint from the final paired replay seeds.
 
 The conditioned arm only diverts when (1) discovery was independently validated and a nonzero ratio was selected by the pipeline, (2) the workload is in the predeclared high-demand/high-priority envelope (midpoints of the experimental factor levels), and (3) observed junction pressure is at least two tasks (one in service plus at least one queued). These thresholds are configured assumptions, not values discovered by the system. The report provides arm-level measures and paired treatment-minus-baseline differences with 95% Student-t intervals. Results remain evidence from this simplified queueing model, not Isaac Sim or physical robotics.
+
+
+## Detour-cost sensitivity experiment
+
+Use `resiliant fleet-sensitivity` to vary the configured robot-occupancy penalty after bypass-route service across `0, 2.5, 5, 10, 20, 30` simulated seconds. It runs the baseline, static and conditioned policy arms with paired seeds in both nominal and high-risk conditions. The selected bypass ratio remains fixed at `0.45` by default so the sweep tests the detour assumption without re-selecting the policy at each level. Override it with `--bypass-ratio` only when intentionally testing a different fixed ratio.
+
+```bash
+.venv/bin/resiliant fleet-sensitivity
+# Small smoke run: fewer paired seeds and two cost levels
+.venv/bin/resiliant fleet-sensitivity --output-dir artifacts/fleet-sensitivity-smoke --replay-seeds 3 --detour-costs 0 2.5
+```
+
+Artifacts include a human-readable `report.md`, structured `summary.json` with paired treatment-minus-control intervals, a long-form `sensitivity.csv`, and per-run `runs.jsonl` plus `manifests.jsonl`. The default run contains 432 simulations (6 detour levels × 2 operating conditions × 3 policy arms × 12 seeds). The confidence intervals are exploratory, unadjusted 95% Student-t intervals across multiple levels and metrics. The score weights are design judgments and the default 2.5-second detour is not calibrated from real-world route data. All outputs remain CPU discrete-event model evidence—not Isaac Sim or physical-robot evidence.

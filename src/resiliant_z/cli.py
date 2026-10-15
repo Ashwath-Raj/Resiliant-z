@@ -16,6 +16,10 @@ from resiliant_z import __version__
 from resiliant_z.fleet_pipeline import run_fleet_demo
 from resiliant_z.llm.nebius import DEFAULT_BASE_URL, nebius_is_configured
 from resiliant_z.pipeline import run_demo
+from resiliant_z.sensitivity import (
+    DEFAULT_DETOUR_COST_LEVELS_SECONDS,
+    run_detour_sensitivity,
+)
 from resiliant_z.simulation.isaac_csv import import_isaac_metrics_csv
 
 
@@ -37,6 +41,22 @@ def _get_parser() -> argparse.ArgumentParser:
     fleet_demo.add_argument("--output-dir", default="artifacts/fleet-demo")
     fleet_demo.add_argument("--seeds-per-cell", type=int, default=5)
     fleet_demo.add_argument("--replay-seeds", type=int, default=12)
+
+    sensitivity = sub.add_parser(
+        "fleet-sensitivity",
+        help="run a paired local sensitivity sweep over bypass detour costs (not Isaac Sim)",
+    )
+    sensitivity.add_argument("--output-dir", default="artifacts/fleet-sensitivity")
+    sensitivity.add_argument("--replay-seeds", type=int, default=12)
+    sensitivity.add_argument("--bypass-ratio", type=float, default=0.45)
+    sensitivity.add_argument("--first-seed", type=int, default=71001)
+    sensitivity.add_argument(
+        "--detour-costs",
+        type=float,
+        nargs="+",
+        default=list(DEFAULT_DETOUR_COST_LEVELS_SECONDS),
+        help="detour occupancy penalties in simulated seconds (range 0-30; include 0)",
+    )
 
     sub.add_parser("doctor", help="check local environment and non-secret configuration state")
     sub.add_parser("models", help="list model IDs visible to your Token Factory API key")
@@ -134,6 +154,29 @@ def main() -> int:
         }, indent=2))
         print("\nRead report: " + str((Path(args.output_dir) / "report.md").resolve()))
         return 0 if summary["discovery"]["status"] == "validated" else 2
+    if args.command == "fleet-sensitivity":
+        try:
+            summary = run_detour_sensitivity(
+                output_dir=Path(args.output_dir),
+                replay_seeds=args.replay_seeds,
+                detour_cost_levels_seconds=tuple(args.detour_costs),
+                bypass_ratio=args.bypass_ratio,
+                first_seed=args.first_seed,
+            )
+        except Exception as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps({
+            "project": summary["project"],
+            "evidence_label": summary["evidence_label"],
+            "backend": summary["backend"],
+            "counts": summary["counts"],
+            "detour_cost_levels_seconds": summary["protocol"]["detour_cost_levels_seconds"],
+            "fixed_bypass_ratio": summary["protocol"]["selected_bypass_ratio_held_fixed"],
+            "artifacts": str(Path(args.output_dir).resolve()),
+        }, indent=2))
+        print("\nRead report: " + str((Path(args.output_dir) / "report.md").resolve()))
+        return 0
     if args.command == "demo":
         try:
             summary = run_demo(
