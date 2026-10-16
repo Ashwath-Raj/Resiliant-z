@@ -1,0 +1,210 @@
+{
+  "$defs": {
+    "CandidateSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "spec_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Spec Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "main_effect",
+            "interaction"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "variable_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Variable Ids",
+          "type": "array"
+        },
+        "label": {
+          "maxLength": 256,
+          "minLength": 8,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spec_id",
+        "kind",
+        "variable_ids",
+        "label"
+      ],
+      "title": "CandidateSpec",
+      "type": "object"
+    },
+    "FactorDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "factor_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Factor Id",
+          "type": "string"
+        },
+        "unit": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "min_value": {
+          "title": "Min Value",
+          "type": "number"
+        },
+        "max_value": {
+          "title": "Max Value",
+          "type": "number"
+        },
+        "calibration_status": {
+          "enum": [
+            "synthetic_uncalibrated",
+            "measured_unverified",
+            "calibrated"
+          ],
+          "title": "Calibration Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "factor_id",
+        "unit",
+        "min_value",
+        "max_value",
+        "calibration_status"
+      ],
+      "title": "FactorDefinition",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "config_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$",
+      "title": "Config Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "backend_id": {
+      "enum": [
+        "discrete_event",
+        "surrogate"
+      ],
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "evidence_label": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Evidence Label",
+      "type": "string"
+    },
+    "target_metric": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "target_unit": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Target Unit",
+      "type": "string"
+    },
+    "factor_registry": {
+      "items": {
+        "$ref": "#/$defs/FactorDefinition"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Factor Registry",
+      "type": "array"
+    },
+    "candidate_specs": {
+      "items": {
+        "$ref": "#/$defs/CandidateSpec"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "title": "Candidate Specs",
+      "type": "array"
+    },
+    "minimum_observations": {
+      "default": 12,
+      "maximum": 10000,
+      "minimum": 6,
+      "title": "Minimum Observations",
+      "type": "integer"
+    },
+    "minimum_absolute_effect": {
+      "default": 1.0,
+      "minimum": 0.0,
+      "title": "Minimum Absolute Effect",
+      "type": "number"
+    },
+    "confidence_z_value": {
+      "default": 1.96,
+      "exclusiveMinimum": 0.0,
+      "maximum": 4.0,
+      "title": "Confidence Z Value",
+      "type": "number"
+    },
+    "max_input_bytes": {
+      "default": 8388608,
+      "maximum": 67108864,
+      "minimum": 1024,
+      "title": "Max Input Bytes",
+      "type": "integer"
+    },
+    "max_observations": {
+      "default": 10000,
+      "maximum": 100000,
+      "minimum": 6,
+      "title": "Max Observations",
+      "type": "integer"
+    },
+    "max_evidence_ids_per_candidate": {
+      "default": 500,
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Max Evidence Ids Per Candidate",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "config_id",
+    "scenario_id",
+    "backend_id",
+    "evidence_label",
+    "target_metric",
+    "target_unit",
+    "factor_registry",
+    "candidate_specs"
+  ],
+  "title": "CandidateDiscoveryConfig",
+  "type": "object"
+}

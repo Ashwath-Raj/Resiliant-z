@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "policy-replay-config.v1.schema.json",
+  "title": "RESILIANT-Z Session 14 Policy Replay Config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "config_id", "allowed_policy_parameters", "parameter_bounds", "max_absolute_policy_delta", "minimum_complete_pairs", "maximum_replay_pairs", "primary_metric_id", "primary_metric_unit", "primary_metric_direction", "minimum_practical_improvement", "guardrail_metrics", "require_all_guardrails_measured_for_review"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "config_id": {"type": "string", "minLength": 1},
+    "allowed_policy_parameters": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "parameter_bounds": {"type": "object", "additionalProperties": {"type": "object", "required": ["minimum", "maximum"], "properties": {"minimum": {"type": "number"}, "maximum": {"type": "number"}}, "additionalProperties": false}},
+    "max_absolute_policy_delta": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+    "minimum_complete_pairs": {"type": "integer", "minimum": 2, "maximum": 1000},
+    "maximum_replay_pairs": {"type": "integer", "minimum": 1, "maximum": 100000},
+    "primary_metric_id": {"type": "string"},
+    "primary_metric_unit": {"type": "string"},
+    "primary_metric_direction": {"enum": ["lower_is_better", "higher_is_better"]},
+    "minimum_practical_improvement": {"type": "number", "exclusiveMinimum": 0},
+    "guardrail_metrics": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["metric_id", "unit", "expected_change"], "properties": {"metric_id": {"type": "string"}, "unit": {"type": "string"}, "expected_change": {"enum": ["non_increase", "non_decrease"]}}}},
+    "require_all_guardrails_measured_for_review": {"const": true},
+    "max_config_bytes": {"type": "integer", "minimum": 1024, "maximum": 2097152},
+    "max_input_bytes": {"type": "integer", "minimum": 1024, "maximum": 67108864},
+    "max_report_bytes": {"type": "integer", "minimum": 1024, "maximum": 8388608}
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "config_id": "session11-local-queue-candidate-discovery-v1",
+  "scenario_id": "warehouse-cross-aisles-synthetic-v1",
+  "backend_id": "discrete_event",
+  "evidence_label": "LOCAL DISCRETE-EVENT FLEET MODEL — NOT ISAAC SIM",
+  "target_metric": "queue_growth",
+  "target_unit": "tasks",
+  "factor_registry": [
+    {
+      "factor_id": "traffic_demand",
+      "unit": "dimensionless workload multiplier; not tasks/minute",
+      "min_value": 0.4,
+      "max_value": 1.2,
+      "calibration_status": "synthetic_uncalibrated"
+    },
+    {
+      "factor_id": "priority_ratio",
+      "unit": "fraction of arriving tasks",
+      "min_value": 0.1,
+      "max_value": 0.6,
+      "calibration_status": "synthetic_uncalibrated"
+    },
+    {
+      "factor_id": "junction_occupancy",
+      "unit": "fraction [0,1]",
+      "min_value": 0.0,
+      "max_value": 1.0,
+      "calibration_status": "synthetic_uncalibrated"
+    }
+  ],
+  "candidate_specs": [
+    {
+      "spec_id": "traffic-demand-main-effect",
+      "kind": "main_effect",
+      "variable_ids": ["traffic_demand"],
+      "label": "Traffic demand association with queue growth"
+    },
+    {
+      "spec_id": "priority-ratio-main-effect",
+      "kind": "main_effect",
+      "variable_ids": ["priority_ratio"],
+      "label": "Priority-task concentration association with queue growth"
+    },
+    {
+      "spec_id": "junction-occupancy-priority-interaction",
+      "kind": "interaction",
+      "variable_ids": ["junction_occupancy", "priority_ratio"],
+      "label": "Junction occupancy by priority-ratio interaction on queue growth"
+    }
+  ],
+  "minimum_observations": 12,
+  "minimum_absolute_effect": 1.0,
+  "confidence_z_value": 1.96,
+  "max_input_bytes": 8388608,
+  "max_observations": 10000,
+  "max_evidence_ids_per_candidate": 500
+}

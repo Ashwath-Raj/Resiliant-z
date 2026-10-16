@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "config_id": "session14-policy-replay-v1",
+  "allowed_policy_parameters": ["alternate_route_preference", "junction_avoidance_bias"],
+  "parameter_bounds": {
+    "alternate_route_preference": {"minimum": 0.0, "maximum": 1.0},
+    "junction_avoidance_bias": {"minimum": 0.0, "maximum": 1.0}
+  },
+  "max_absolute_policy_delta": 0.1,
+  "minimum_complete_pairs": 4,
+  "maximum_replay_pairs": 10000,
+  "primary_metric_id": "queue_growth",
+  "primary_metric_unit": "tasks",
+  "primary_metric_direction": "lower_is_better",
+  "minimum_practical_improvement": 0.5,
+  "guardrail_metrics": [
+    {"metric_id": "deadlock_events", "unit": "events", "expected_change": "non_increase"},
+    {"metric_id": "collision_count", "unit": "events", "expected_change": "non_increase"}
+  ],
+  "require_all_guardrails_measured_for_review": true,
+  "max_config_bytes": 2097152,
+  "max_input_bytes": 67108864,
+  "max_report_bytes": 8388608
+}

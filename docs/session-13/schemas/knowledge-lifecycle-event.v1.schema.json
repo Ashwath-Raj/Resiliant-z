@@ -1,0 +1,61 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "event_id": {
+      "pattern": "^kwevent-[0-9a-f]{24}$",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "enum": [
+        "invalidate",
+        "rollback"
+      ],
+      "title": "Event Type",
+      "type": "string"
+    },
+    "knowledge_id": {
+      "pattern": "^know-[0-9a-f]{24}$",
+      "title": "Knowledge Id",
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "restores_knowledge_id": {
+      "anyOf": [
+        {
+          "pattern": "^know-[0-9a-f]{24}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Restores Knowledge Id"
+    },
+    "created_at_utc": {
+      "title": "Created At Utc",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "knowledge_id",
+    "reason",
+    "created_at_utc"
+  ],
+  "title": "LifecycleEvent",
+  "type": "object"
+}

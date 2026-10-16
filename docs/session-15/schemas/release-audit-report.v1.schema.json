@@ -1,0 +1,183 @@
+{
+  "$defs": {
+    "AuditCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "enum": [
+            "required_file",
+            "json_syntax",
+            "git_state",
+            "safety_boundary"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "check_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Check Id",
+          "type": "string"
+        },
+        "evidence_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Path"
+        },
+        "message": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "warning",
+            "blocked",
+            "not_assessed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "category",
+        "status",
+        "message"
+      ],
+      "title": "AuditCheck",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "audit_id": {
+      "pattern": "^audit-[0-9a-f]{20}$",
+      "title": "Audit Id",
+      "type": "string"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/AuditCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "cloud_job_launched": {
+      "const": false,
+      "default": false,
+      "title": "Cloud Job Launched",
+      "type": "boolean"
+    },
+    "execution_authorized": {
+      "const": false,
+      "default": false,
+      "title": "Execution Authorized",
+      "type": "boolean"
+    },
+    "generated_at_utc": {
+      "format": "date-time",
+      "title": "Generated At Utc",
+      "type": "string"
+    },
+    "git_commit": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Git Commit"
+    },
+    "host_gate": {
+      "default": "not_assessed",
+      "enum": [
+        "not_assessed",
+        "blocked",
+        "attested_meets_configured_thresholds"
+      ],
+      "title": "Host Gate",
+      "type": "string"
+    },
+    "isaac_sim_launched": {
+      "const": false,
+      "default": false,
+      "title": "Isaac Sim Launched",
+      "type": "boolean"
+    },
+    "live_policy_modified": {
+      "const": false,
+      "default": false,
+      "title": "Live Policy Modified",
+      "type": "boolean"
+    },
+    "project_root_label": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Project Root Label",
+      "type": "string"
+    },
+    "report_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Report Sha256",
+      "type": "string"
+    },
+    "scanned_json_files": {
+      "minimum": 0,
+      "title": "Scanned Json Files",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "software_gate": {
+      "enum": [
+        "pass_for_handoff_review",
+        "blocked"
+      ],
+      "title": "Software Gate",
+      "type": "string"
+    }
+  },
+  "required": [
+    "audit_id",
+    "generated_at_utc",
+    "project_root_label",
+    "software_gate",
+    "checks",
+    "scanned_json_files",
+    "report_sha256"
+  ],
+  "title": "ReleaseAuditReport",
+  "type": "object"
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "additional_required_paths": [],
+  "scan_json_directories": ["configs", "docs"],
+  "max_json_file_bytes": 5000000,
+  "require_clean_tracked_diff": false
+}

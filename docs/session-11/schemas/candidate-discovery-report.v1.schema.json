@@ -1,0 +1,432 @@
+{
+  "$defs": {
+    "CandidateFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "candidate_id": {
+          "pattern": "^cand-[0-9a-f]{24}$",
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "spec_id": {
+          "title": "Spec Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "candidate_kind": {
+          "enum": [
+            "main_effect",
+            "interaction"
+          ],
+          "title": "Candidate Kind",
+          "type": "string"
+        },
+        "variable_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Variable Ids",
+          "type": "array"
+        },
+        "target_metric": {
+          "title": "Target Metric",
+          "type": "string"
+        },
+        "target_unit": {
+          "title": "Target Unit",
+          "type": "string"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "backend_id": {
+          "enum": [
+            "discrete_event",
+            "surrogate"
+          ],
+          "title": "Backend Id",
+          "type": "string"
+        },
+        "evidence_label": {
+          "title": "Evidence Label",
+          "type": "string"
+        },
+        "model_version": {
+          "title": "Model Version",
+          "type": "string"
+        },
+        "observation_count": {
+          "minimum": 0,
+          "title": "Observation Count",
+          "type": "integer"
+        },
+        "degrees_of_freedom": {
+          "minimum": 0,
+          "title": "Degrees Of Freedom",
+          "type": "integer"
+        },
+        "effect_contrast_definition": {
+          "title": "Effect Contrast Definition",
+          "type": "string"
+        },
+        "estimated_effect": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Effect"
+        },
+        "standard_error": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard Error"
+        },
+        "confidence_interval_95_low": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Interval 95 Low"
+        },
+        "confidence_interval_95_high": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Interval 95 High"
+        },
+        "effect_direction": {
+          "enum": [
+            "increase",
+            "decrease",
+            "positive_interaction",
+            "negative_interaction",
+            "unclear"
+          ],
+          "title": "Effect Direction",
+          "type": "string"
+        },
+        "factor_ranges": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FactorRange"
+          },
+          "title": "Factor Ranges",
+          "type": "object"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "selection_outcome": {
+          "enum": [
+            "shortlisted",
+            "not_shortlisted",
+            "insufficient_evidence"
+          ],
+          "title": "Selection Outcome",
+          "type": "string"
+        },
+        "selection_reason": {
+          "title": "Selection Reason",
+          "type": "string"
+        },
+        "lifecycle_status": {
+          "const": "provisional",
+          "default": "provisional",
+          "title": "Lifecycle Status",
+          "type": "string"
+        },
+        "method_id": {
+          "const": "coded-ols-normal-approx-v1",
+          "default": "coded-ols-normal-approx-v1",
+          "title": "Method Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "spec_id",
+        "label",
+        "candidate_kind",
+        "variable_ids",
+        "target_metric",
+        "target_unit",
+        "scenario_id",
+        "backend_id",
+        "evidence_label",
+        "model_version",
+        "observation_count",
+        "degrees_of_freedom",
+        "effect_contrast_definition",
+        "effect_direction",
+        "factor_ranges",
+        "evidence_ids",
+        "selection_outcome",
+        "selection_reason"
+      ],
+      "title": "CandidateFinding",
+      "type": "object"
+    },
+    "FactorRange": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_observed": {
+          "title": "Minimum Observed",
+          "type": "number"
+        },
+        "maximum_observed": {
+          "title": "Maximum Observed",
+          "type": "number"
+        },
+        "unit": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "calibration_status": {
+          "enum": [
+            "synthetic_uncalibrated",
+            "measured_unverified",
+            "calibrated"
+          ],
+          "title": "Calibration Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "minimum_observed",
+        "maximum_observed",
+        "unit",
+        "calibration_status"
+      ],
+      "title": "FactorRange",
+      "type": "object"
+    },
+    "ObservationAudit": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "discovery",
+            "selection",
+            "validation",
+            "replay"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "disposition": {
+          "enum": [
+            "eligible_for_candidate_discovery",
+            "excluded"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "observation_id",
+        "split",
+        "disposition",
+        "reason"
+      ],
+      "title": "ObservationAudit",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "batch_id": {
+      "pattern": "^candbatch-[0-9a-f]{24}$",
+      "title": "Batch Id",
+      "type": "string"
+    },
+    "status": {
+      "const": "provisional_candidates_only",
+      "default": "provisional_candidates_only",
+      "title": "Status",
+      "type": "string"
+    },
+    "config_id": {
+      "title": "Config Id",
+      "type": "string"
+    },
+    "config_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Config Sha256",
+      "type": "string"
+    },
+    "eligible_input_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Eligible Input Sha256",
+      "type": "string"
+    },
+    "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "backend_id": {
+      "enum": [
+        "discrete_event",
+        "surrogate"
+      ],
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "evidence_label": {
+      "title": "Evidence Label",
+      "type": "string"
+    },
+    "target_metric": {
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "target_unit": {
+      "title": "Target Unit",
+      "type": "string"
+    },
+    "training_splits": {
+      "default": [
+        "discovery",
+        "selection"
+      ],
+      "items": {
+        "enum": [
+          "discovery",
+          "selection"
+        ],
+        "type": "string"
+      },
+      "title": "Training Splits",
+      "type": "array"
+    },
+    "total_observations_received": {
+      "minimum": 0,
+      "title": "Total Observations Received",
+      "type": "integer"
+    },
+    "eligible_observations": {
+      "minimum": 0,
+      "title": "Eligible Observations",
+      "type": "integer"
+    },
+    "excluded_observation_count": {
+      "minimum": 0,
+      "title": "Excluded Observation Count",
+      "type": "integer"
+    },
+    "excluded_reasons": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Excluded Reasons",
+      "type": "object"
+    },
+    "candidates": {
+      "items": {
+        "$ref": "#/$defs/CandidateFinding"
+      },
+      "maxItems": 25,
+      "title": "Candidates",
+      "type": "array"
+    },
+    "audit": {
+      "items": {
+        "$ref": "#/$defs/ObservationAudit"
+      },
+      "maxItems": 10000,
+      "title": "Audit",
+      "type": "array"
+    },
+    "selection_procedure": {
+      "title": "Selection Procedure",
+      "type": "string"
+    },
+    "model_version": {
+      "const": "candidate-discovery.ols-coded.v1",
+      "default": "candidate-discovery.ols-coded.v1",
+      "title": "Model Version",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "batch_id",
+    "config_id",
+    "config_sha256",
+    "eligible_input_sha256",
+    "scenario_id",
+    "backend_id",
+    "evidence_label",
+    "target_metric",
+    "target_unit",
+    "total_observations_received",
+    "eligible_observations",
+    "excluded_observation_count",
+    "excluded_reasons",
+    "candidates",
+    "audit",
+    "selection_procedure",
+    "limitations"
+  ],
+  "title": "CandidateDiscoveryReport",
+  "type": "object"
+}

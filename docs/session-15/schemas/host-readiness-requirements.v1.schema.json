@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Configurable minimums. Verify these against the chosen official release.",
+  "properties": {
+    "minimum_free_disk_gb": {
+      "exclusiveMinimum": 0,
+      "maximum": 100000,
+      "title": "Minimum Free Disk Gb",
+      "type": "number"
+    },
+    "minimum_gpu_vram_gb": {
+      "exclusiveMinimum": 0,
+      "maximum": 512,
+      "title": "Minimum Gpu Vram Gb",
+      "type": "number"
+    },
+    "minimum_system_ram_gb": {
+      "exclusiveMinimum": 0,
+      "maximum": 2048,
+      "title": "Minimum System Ram Gb",
+      "type": "number"
+    },
+    "require_assets_checksum_confirmation": {
+      "default": true,
+      "title": "Require Assets Checksum Confirmation",
+      "type": "boolean"
+    },
+    "require_driver_compatibility_confirmation": {
+      "default": true,
+      "title": "Require Driver Compatibility Confirmation",
+      "type": "boolean"
+    },
+    "require_os_compatibility_confirmation": {
+      "default": true,
+      "title": "Require Os Compatibility Confirmation",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "target_simulator_release": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Target Simulator Release",
+      "type": "string"
+    }
+  },
+  "required": [
+    "target_simulator_release",
+    "minimum_system_ram_gb",
+    "minimum_gpu_vram_gb",
+    "minimum_free_disk_gb"
+  ],
+  "title": "HostReadinessRequirements",
+  "type": "object"
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "paired-replay-input.v1.schema.json",
+  "title": "RESILIANT-Z Session 14 Paired Replay Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "pair_id", "split", "conditions", "baseline", "candidate"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "pair_id": {"type": "string", "minLength": 1},
+    "split": {"const": "replay"},
+    "conditions": {"type": "object", "additionalProperties": {"$ref": "#/$defs/observation"}},
+    "baseline": {"$ref": "#/$defs/side"},
+    "candidate": {"$ref": "#/$defs/side"}
+  },
+  "$defs": {
+    "observation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["unit", "quality"],
+      "properties": {
+        "value": {"type": ["number", "null"]}, "unit": {"type": "string", "minLength": 1},
+        "quality": {"enum": ["measured", "missing", "stale", "not_measured", "not_applicable", "invalid"]},
+        "reason": {"type": ["string", "null"]}
+      }
+    },
+    "side": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run_id", "seed", "scenario_id", "backend_id", "initial_state_id", "task_pattern_id", "workload_pattern_id", "policy_parameters", "metrics"],
+      "properties": {
+        "run_id": {"type": "string"}, "seed": {"type": "integer", "minimum": 0},
+        "scenario_id": {"type": "string"}, "backend_id": {"type": "string"},
+        "initial_state_id": {"type": "string"}, "task_pattern_id": {"type": "string"}, "workload_pattern_id": {"type": "string"},
+        "policy_parameters": {"type": "object", "additionalProperties": {"type": "number"}},
+        "metrics": {"type": "object", "additionalProperties": {"$ref": "#/$defs/observation"}}
+      }
+    }
+  }
+}

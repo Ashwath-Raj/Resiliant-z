@@ -1,0 +1,180 @@
+{
+  "$defs": {
+    "IsaacAdapterContract": {
+      "additionalProperties": false,
+      "description": "Versioned contract only; this is not a working Isaac Sim adapter.",
+      "properties": {
+        "adapter_contract_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Adapter Contract Version",
+          "type": "string"
+        },
+        "adapter_id": {
+          "const": "resiliant-z.isaac-adapter-contract",
+          "default": "resiliant-z.isaac-adapter-contract",
+          "title": "Adapter Id",
+          "type": "string"
+        },
+        "adapter_runtime_status": {
+          "const": "not_started",
+          "default": "not_started",
+          "title": "Adapter Runtime Status",
+          "type": "string"
+        },
+        "automatic_execution_allowed": {
+          "const": false,
+          "default": false,
+          "title": "Automatic Execution Allowed",
+          "type": "boolean"
+        },
+        "host_launch_authorized": {
+          "const": false,
+          "default": false,
+          "title": "Host Launch Authorized",
+          "type": "boolean"
+        },
+        "implementation_status": {
+          "const": "contract_only_not_implemented",
+          "default": "contract_only_not_implemented",
+          "title": "Implementation Status",
+          "type": "string"
+        },
+        "required_capabilities": {
+          "default": [
+            "deterministic_seed_control",
+            "scenario_reset",
+            "timestamped_metrics",
+            "run_metadata_export",
+            "clean_shutdown"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Capabilities",
+          "type": "array"
+        },
+        "scenario_schema_versions": {
+          "default": [
+            "1.0.0"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Scenario Schema Versions",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "telemetry_schema_versions": {
+          "default": [
+            "1.0.0"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Telemetry Schema Versions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "adapter_contract_version"
+      ],
+      "title": "IsaacAdapterContract",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter_contract": {
+      "$ref": "#/$defs/IsaacAdapterContract"
+    },
+    "cloud_job_launched": {
+      "const": false,
+      "default": false,
+      "title": "Cloud Job Launched",
+      "type": "boolean"
+    },
+    "generated_at_utc": {
+      "format": "date-time",
+      "title": "Generated At Utc",
+      "type": "string"
+    },
+    "git_commit": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Git Commit"
+    },
+    "handoff_id": {
+      "pattern": "^handoff-[0-9a-f]{20}$",
+      "title": "Handoff Id",
+      "type": "string"
+    },
+    "handoff_status": {
+      "enum": [
+        "software_contracts_prepared_host_not_assessed",
+        "blocked"
+      ],
+      "title": "Handoff Status",
+      "type": "string"
+    },
+    "host_launch_authorized": {
+      "const": false,
+      "default": false,
+      "title": "Host Launch Authorized",
+      "type": "boolean"
+    },
+    "isaac_sim_launched": {
+      "const": false,
+      "default": false,
+      "title": "Isaac Sim Launched",
+      "type": "boolean"
+    },
+    "live_policy_modified": {
+      "const": false,
+      "default": false,
+      "title": "Live Policy Modified",
+      "type": "boolean"
+    },
+    "required_operator_actions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Operator Actions",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "software_audit_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Software Audit Sha256",
+      "type": "string"
+    }
+  },
+  "required": [
+    "handoff_id",
+    "generated_at_utc",
+    "software_audit_sha256",
+    "adapter_contract",
+    "handoff_status",
+    "required_operator_actions"
+  ],
+  "title": "HandoffManifest",
+  "type": "object"
+}

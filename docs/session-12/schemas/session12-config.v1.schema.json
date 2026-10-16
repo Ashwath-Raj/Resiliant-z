@@ -1,0 +1,219 @@
+{
+  "$defs": {
+    "FactorLevels": {
+      "additionalProperties": false,
+      "properties": {
+        "low": {
+          "title": "Low",
+          "type": "number"
+        },
+        "high": {
+          "title": "High",
+          "type": "number"
+        }
+      },
+      "required": [
+        "low",
+        "high"
+      ],
+      "title": "FactorLevels",
+      "type": "object"
+    },
+    "ValidationRule": {
+      "additionalProperties": false,
+      "properties": {
+        "spec_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Spec Id",
+          "type": "string"
+        },
+        "expected_effect_sign": {
+          "enum": [
+            "positive",
+            "negative"
+          ],
+          "title": "Expected Effect Sign",
+          "type": "string"
+        },
+        "factor_levels": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FactorLevels"
+          },
+          "maxProperties": 2,
+          "minProperties": 1,
+          "title": "Factor Levels",
+          "type": "object"
+        },
+        "minimum_replicates": {
+          "default": 6,
+          "maximum": 100,
+          "minimum": 3,
+          "title": "Minimum Replicates",
+          "type": "integer"
+        },
+        "minimum_absolute_effect": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Minimum Absolute Effect",
+          "type": "number"
+        },
+        "minimum_concordant_fraction": {
+          "default": 0.8,
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Minimum Concordant Fraction",
+          "type": "number"
+        },
+        "minimum_effect_retention_fraction": {
+          "default": 0.25,
+          "maximum": 2.0,
+          "minimum": 0.0,
+          "title": "Minimum Effect Retention Fraction",
+          "type": "number"
+        },
+        "minimum_distinct_scenarios": {
+          "default": 2,
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Minimum Distinct Scenarios",
+          "type": "integer"
+        },
+        "minimum_distinct_initial_states": {
+          "default": 2,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Minimum Distinct Initial States",
+          "type": "integer"
+        },
+        "minimum_distinct_task_patterns": {
+          "default": 2,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Minimum Distinct Task Patterns",
+          "type": "integer"
+        },
+        "minimum_distinct_workload_patterns": {
+          "default": 2,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Minimum Distinct Workload Patterns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "spec_id",
+        "expected_effect_sign",
+        "factor_levels"
+      ],
+      "title": "ValidationRule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "config_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$",
+      "title": "Config Id",
+      "type": "string"
+    },
+    "primary_split": {
+      "const": "validation",
+      "default": "validation",
+      "title": "Primary Split",
+      "type": "string"
+    },
+    "allowed_validation_scenarios": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 2,
+      "title": "Allowed Validation Scenarios",
+      "type": "array"
+    },
+    "rules": {
+      "items": {
+        "$ref": "#/$defs/ValidationRule"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "title": "Rules",
+      "type": "array"
+    },
+    "minimum_training_evidence_links": {
+      "default": 1,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Minimum Training Evidence Links",
+      "type": "integer"
+    },
+    "metric_min_value": {
+      "default": -1000000.0,
+      "title": "Metric Min Value",
+      "type": "number"
+    },
+    "metric_max_value": {
+      "default": 1000000.0,
+      "title": "Metric Max Value",
+      "type": "number"
+    },
+    "max_config_bytes": {
+      "default": 1048576,
+      "maximum": 8388608,
+      "minimum": 1024,
+      "title": "Max Config Bytes",
+      "type": "integer"
+    },
+    "max_candidate_report_bytes": {
+      "default": 8388608,
+      "maximum": 32000000,
+      "minimum": 1024,
+      "title": "Max Candidate Report Bytes",
+      "type": "integer"
+    },
+    "max_observation_bytes": {
+      "default": 16777216,
+      "maximum": 64000000,
+      "minimum": 1024,
+      "title": "Max Observation Bytes",
+      "type": "integer"
+    },
+    "max_observations": {
+      "default": 100000,
+      "maximum": 200000,
+      "minimum": 10,
+      "title": "Max Observations",
+      "type": "integer"
+    },
+    "max_candidates": {
+      "default": 25,
+      "maximum": 25,
+      "minimum": 1,
+      "title": "Max Candidates",
+      "type": "integer"
+    },
+    "max_report_bytes": {
+      "default": 16777216,
+      "maximum": 64000000,
+      "minimum": 1024,
+      "title": "Max Report Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "config_id",
+    "allowed_validation_scenarios",
+    "rules"
+  ],
+  "title": "Session12Config",
+  "type": "object"
+}

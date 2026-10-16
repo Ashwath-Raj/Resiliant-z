@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "config_id": "session13-policy-boundaries-v1",
+  "allowed_operational_backends": [
+    "isaac_sim_physics",
+    "calibrated_hardware_trial"
+  ],
+  "allowed_operational_evidence_labels": [
+    "ISAAC SIM PHYSICS-CALIBRATED FLEET",
+    "CALIBRATED FIELD TRIAL"
+  ],
+  "minimum_validated_scenarios": 2,
+  "require_calibrated_factors": true,
+  "require_human_approval": true,
+  "automatic_application_allowed": false,
+  "max_config_bytes": 1048576,
+  "rules": [
+    {
+      "spec_id": "priority_queue_main_effect",
+      "target_metric": "queue_growth",
+      "expected_effect_sign": "positive",
+      "policy_parameter_id": "alternate_route_preference",
+      "update_direction": "increase",
+      "step_size": 0.05,
+      "current_value": 0.5,
+      "minimum_value": 0.0,
+      "maximum_value": 1.0,
+      "minimum_absolute_effect": 1.0
+    },
+    {
+      "spec_id": "junction_priority_interaction",
+      "target_metric": "queue_growth",
+      "expected_effect_sign": "positive",
+      "policy_parameter_id": "junction_avoidance_bias",
+      "update_direction": "increase",
+      "step_size": 0.02,
+      "current_value": 0.4,
+      "minimum_value": 0.0,
+      "maximum_value": 1.0,
+      "minimum_absolute_effect": 1.0
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "$defs": {
+    "PolicyRule": {
+      "additionalProperties": false,
+      "properties": {
+        "spec_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Spec Id",
+          "type": "string"
+        },
+        "target_metric": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Target Metric",
+          "type": "string"
+        },
+        "expected_effect_sign": {
+          "enum": [
+            "positive",
+            "negative"
+          ],
+          "title": "Expected Effect Sign",
+          "type": "string"
+        },
+        "policy_parameter_id": {
+          "pattern": "^[a-z][a-z0-9_]{1,95}$",
+          "title": "Policy Parameter Id",
+          "type": "string"
+        },
+        "update_direction": {
+          "enum": [
+            "increase",
+            "decrease"
+          ],
+          "title": "Update Direction",
+          "type": "string"
+        },
+        "step_size": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Step Size",
+          "type": "number"
+        },
+        "current_value": {
+          "title": "Current Value",
+          "type": "number"
+        },
+        "minimum_value": {
+          "title": "Minimum Value",
+          "type": "number"
+        },
+        "maximum_value": {
+          "title": "Maximum Value",
+          "type": "number"
+        },
+        "minimum_absolute_effect": {
+          "minimum": 0.0,
+          "title": "Minimum Absolute Effect",
+          "type": "number"
+        }
+      },
+      "required": [
+        "spec_id",
+        "target_metric",
+        "expected_effect_sign",
+        "policy_parameter_id",
+        "update_direction",
+        "step_size",
+        "current_value",
+        "minimum_value",
+        "maximum_value",
+        "minimum_absolute_effect"
+      ],
+      "title": "PolicyRule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "config_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Config Id",
+      "type": "string"
+    },
+    "allowed_operational_backends": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Allowed Operational Backends",
+      "type": "array"
+    },
+    "allowed_operational_evidence_labels": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Allowed Operational Evidence Labels",
+      "type": "array"
+    },
+    "minimum_validated_scenarios": {
+      "default": 2,
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Minimum Validated Scenarios",
+      "type": "integer"
+    },
+    "require_calibrated_factors": {
+      "const": true,
+      "default": true,
+      "title": "Require Calibrated Factors",
+      "type": "boolean"
+    },
+    "require_human_approval": {
+      "const": true,
+      "default": true,
+      "title": "Require Human Approval",
+      "type": "boolean"
+    },
+    "automatic_application_allowed": {
+      "const": false,
+      "default": false,
+      "title": "Automatic Application Allowed",
+      "type": "boolean"
+    },
+    "rules": {
+      "items": {
+        "$ref": "#/$defs/PolicyRule"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "title": "Rules",
+      "type": "array"
+    },
+    "max_config_bytes": {
+      "default": 1048576,
+      "maximum": 8388608,
+      "minimum": 1024,
+      "title": "Max Config Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "config_id",
+    "allowed_operational_backends",
+    "allowed_operational_evidence_labels",
+    "rules"
+  ],
+  "title": "PolicyUpdateConfig",
+  "type": "object"
+}

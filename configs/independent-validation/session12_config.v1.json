@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "config_id": "session12-independent-validation-v1",
+  "primary_split": "validation",
+  "allowed_validation_scenarios": [
+    "warehouse-layout-b",
+    "warehouse-task-mix-c"
+  ],
+  "minimum_training_evidence_links": 1,
+  "metric_min_value": -1000000.0,
+  "metric_max_value": 1000000.0,
+  "max_config_bytes": 1048576,
+  "max_candidate_report_bytes": 8388608,
+  "max_observation_bytes": 16777216,
+  "max_observations": 100000,
+  "max_candidates": 25,
+  "max_report_bytes": 16777216,
+  "rules": [
+    {
+      "spec_id": "priority_queue_main_effect",
+      "expected_effect_sign": "positive",
+      "factor_levels": {
+        "priority_ratio": {
+          "low": 0.2,
+          "high": 0.8
+        }
+      },
+      "minimum_replicates": 6,
+      "minimum_absolute_effect": 2.0,
+      "minimum_concordant_fraction": 0.8,
+      "minimum_effect_retention_fraction": 0.25,
+      "minimum_distinct_scenarios": 2,
+      "minimum_distinct_initial_states": 2,
+      "minimum_distinct_task_patterns": 2,
+      "minimum_distinct_workload_patterns": 2
+    },
+    {
+      "spec_id": "junction_priority_interaction",
+      "expected_effect_sign": "positive",
+      "factor_levels": {
+        "junction_occupancy": {
+          "low": 0.1,
+          "high": 0.7
+        },
+        "priority_ratio": {
+          "low": 0.2,
+          "high": 0.8
+        }
+      },
+      "minimum_replicates": 6,
+      "minimum_absolute_effect": 1.5,
+      "minimum_concordant_fraction": 0.8,
+      "minimum_effect_retention_fraction": 0.25,
+      "minimum_distinct_scenarios": 2,
+      "minimum_distinct_initial_states": 2,
+      "minimum_distinct_task_patterns": 2,
+      "minimum_distinct_workload_patterns": 2
+    }
+  ]
+}

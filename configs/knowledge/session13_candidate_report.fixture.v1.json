@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0.0",
+  "batch_id": "candbatch-aaaaaaaaaaaaaaaaaaaaaaaa",
+  "status": "provisional_candidates_only",
+  "config_id": "fixture-session11",
+  "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "eligible_input_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "scenario_id": "warehouse-training-v1",
+  "backend_id": "discrete_event",
+  "evidence_label": "LOCAL DISCRETE-EVENT FLEET MODEL \u2014 NOT ISAAC SIM",
+  "target_metric": "queue_growth",
+  "target_unit": "tasks",
+  "training_splits": [
+    "discovery",
+    "selection"
+  ],
+  "total_observations_received": 24,
+  "eligible_observations": 24,
+  "excluded_observation_count": 0,
+  "excluded_reasons": {},
+  "candidates": [
+    {
+      "candidate_id": "cand-111111111111111111111111",
+      "spec_id": "priority_queue_main_effect",
+      "label": "Priority concentration increases queue growth",
+      "candidate_kind": "main_effect",
+      "variable_ids": [
+        "priority_ratio"
+      ],
+      "target_metric": "queue_growth",
+      "target_unit": "tasks",
+      "scenario_id": "warehouse-training-v1",
+      "backend_id": "discrete_event",
+      "evidence_label": "LOCAL DISCRETE-EVENT FLEET MODEL \u2014 NOT ISAAC SIM",
+      "model_version": "candidate-discovery.ols-coded.v1",
+      "observation_count": 16,
+      "degrees_of_freedom": 14,
+      "effect_contrast_definition": "high-minus-low fitted contrast over priority_ratio [0.2, 0.8]",
+      "estimated_effect": 6.0,
+      "standard_error": 0.5,
+      "confidence_interval_95_low": 5.02,
+      "confidence_interval_95_high": 6.98,
+      "effect_direction": "increase",
+      "factor_ranges": {
+        "priority_ratio": {
+          "minimum_observed": 0.2,
+          "maximum_observed": 0.8,
+          "unit": "ratio",
+          "calibration_status": "synthetic_uncalibrated"
+        }
+      },
+      "evidence_ids": [
+        "ev-priority_queue_main_effect-discovery-0001",
+        "ev-priority_queue_main_effect-discovery-0002",
+        "ev-priority_queue_main_effect-discovery-0003",
+        "ev-priority_queue_main_effect-discovery-0004",
+        "ev-priority_queue_main_effect-selection-0005",
+        "ev-priority_queue_main_effect-selection-0006",
+        "ev-priority_queue_main_effect-selection-0007",
+        "ev-priority_queue_main_effect-selection-0008"
+      ],
+      "selection_outcome": "shortlisted",
+      "selection_reason": "synthetic fixture known effect crosses exploratory threshold",
+      "lifecycle_status": "provisional",
+      "method_id": "coded-ols-normal-approx-v1"
+    },
+    {
+      "candidate_id": "cand-222222222222222222222222",
+      "spec_id": "junction_priority_interaction",
+      "label": "Junction occupancy and priority concentration interact",
+      "candidate_kind": "interaction",
+      "variable_ids": [
+        "junction_occupancy",
+        "priority_ratio"
+      ],
+      "target_metric": "queue_growth",
+      "target_unit": "tasks",
+      "scenario_id": "warehouse-training-v1",
+      "backend_id": "discrete_event",
+      "evidence_label": "LOCAL DISCRETE-EVENT FLEET MODEL \u2014 NOT ISAAC SIM",
+      "model_version": "candidate-discovery.ols-coded.v1",
+      "observation_count": 32,
+      "degrees_of_freedom": 28,
+      "effect_contrast_definition": "difference-in-differences over junction_occupancy x priority_ratio",
+      "estimated_effect": 4.1,
+      "standard_error": 0.4,
+      "confidence_interval_95_low": 3.32,
+      "confidence_interval_95_high": 4.88,
+      "effect_direction": "positive_interaction",
+      "factor_ranges": {
+        "junction_occupancy": {
+          "minimum_observed": 0.1,
+          "maximum_observed": 0.7,
+          "unit": "ratio",
+          "calibration_status": "synthetic_uncalibrated"
+        },
+        "priority_ratio": {
+          "minimum_observed": 0.2,
+          "maximum_observed": 0.8,
+          "unit": "ratio",
+          "calibration_status": "synthetic_uncalibrated"
+        }
+      },
+      "evidence_ids": [
+        "ev-junction_priority_interaction-discovery-0009",
+        "ev-junction_priority_interaction-discovery-0010",
+        "ev-junction_priority_interaction-discovery-0011",
+        "ev-junction_priority_interaction-discovery-0012",
+        "ev-junction_priority_interaction-discovery-0013",
+        "ev-junction_priority_interaction-discovery-0014",
+        "ev-junction_priority_interaction-discovery-0015",
+        "ev-junction_priority_interaction-discovery-0016",
+        "ev-junction_priority_interaction-selection-0017",
+        "ev-junction_priority_interaction-selection-0018",
+        "ev-junction_priority_interaction-selection-0019",
+        "ev-junction_priority_interaction-selection-0020",
+        "ev-junction_priority_interaction-selection-0021",
+        "ev-junction_priority_interaction-selection-0022",
+        "ev-junction_priority_interaction-selection-0023",
+        "ev-junction_priority_interaction-selection-0024"
+      ],
+      "selection_outcome": "shortlisted",
+      "selection_reason": "synthetic fixture known interaction crosses exploratory threshold",
+      "lifecycle_status": "provisional",
+      "method_id": "coded-ols-normal-approx-v1"
+    }
+  ],
+  "selection_procedure": "Predeclared synthetic fixture with known main-effect and interaction contrasts.",
+  "model_version": "candidate-discovery.ols-coded.v1",
+  "limitations": [
+    "Synthetic fixture only; not calibrated evidence."
+  ]
+}

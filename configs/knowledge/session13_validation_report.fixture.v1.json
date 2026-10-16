@@ -1,0 +1,601 @@
+{
+  "audit": [
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00009",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00010",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00011",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00012",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00013",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00014",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00015",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00016",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00017",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00018",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00019",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00020",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00021",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00022",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00023",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00024",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "junction_priority_interaction",
+      "split": "selection"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00037",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00038",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00039",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00040",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00041",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00042",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00043",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00044",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00045",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00046",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00047",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00048",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00049",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00050",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00051",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00052",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00053",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00054",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00055",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00056",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00057",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00058",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00059",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00060",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "junction_priority_interaction",
+      "split": "validation"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00001",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00002",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00003",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00004",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "discovery"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00005",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00006",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00007",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "selection"
+    },
+    {
+      "disposition": "training_reference",
+      "observation_id": "obs-00008",
+      "reason": "training row used only to verify evidence linkage and disjointness",
+      "spec_id": "priority_queue_main_effect",
+      "split": "selection"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00025",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00026",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00027",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00028",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00029",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00030",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00031",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00032",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00033",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00034",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00035",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    },
+    {
+      "disposition": "included_validation",
+      "observation_id": "obs-00036",
+      "reason": "measured row contributed to a complete predeclared validation contrast",
+      "spec_id": "priority_queue_main_effect",
+      "split": "validation"
+    }
+  ],
+  "candidate_report_sha256": "d05f655eea32bba1ffb748a4474531de084f5dae2b3a81636f4e6f75692a8b3d",
+  "observation_input_sha256": "520653ffedeab72fe5b2fd148494ae28ffc3e832a78e34918eb37045e76cceb6",
+  "overall_limitations": [
+    "Validation outcomes apply only to the predeclared tested backend/scenarios and listed conditions.",
+    "A validated candidate is not yet a validated operational knowledge record or policy authorization.",
+    "No randomization, physical calibration or causal identification beyond the declared contrast is inferred by this validator.",
+    "The Student-t interval uses a fixed deterministic critical-value table through 30 degrees of freedom and a Cornish-Fisher approximation above that.",
+    "The tool performs offline statistical checks only; it does not execute runs or alter policy."
+  ],
+  "replay_excluded_from_estimation": true,
+  "report_id": "valreport-da01721270b7779315de7e0e",
+  "results": [
+    {
+      "candidate_id": "cand-111111111111111111111111",
+      "candidate_kind": "main_effect",
+      "concordant_fraction": 1.0,
+      "confidence_interval_95_high": 6.148436754208652,
+      "confidence_interval_95_low": 5.851563245791348,
+      "criteria_snapshot": {
+        "candidate_discovery_effect": 6.0,
+        "confidence_method": "two-sided 95% Student-t interval; exact tabulated critical values through df=30, Cornish-Fisher approximation thereafter",
+        "distinct_initial_state_count": 2,
+        "distinct_scenario_count": 2,
+        "distinct_task_pattern_count": 2,
+        "distinct_workload_pattern_count": 2,
+        "expected_effect_sign": "positive",
+        "factor_levels": {
+          "priority_ratio": {
+            "high": 0.8,
+            "low": 0.2
+          }
+        },
+        "minimum_absolute_effect": 2.0,
+        "minimum_concordant_fraction": 0.8,
+        "minimum_distinct_initial_states": 2,
+        "minimum_distinct_scenarios": 2,
+        "minimum_distinct_task_patterns": 2,
+        "minimum_distinct_workload_patterns": 2,
+        "minimum_effect_retention_fraction": 0.25,
+        "minimum_replicates": 6,
+        "predeclared_direction": "positive",
+        "spec_id": "priority_queue_main_effect"
+      },
+      "distinct_initial_states": 2,
+      "distinct_task_patterns": 2,
+      "distinct_workload_patterns": 2,
+      "effect_retention_fraction": 1.0,
+      "evidence_ids": [
+        "ev-priority_queue_main_effect-validation-0025",
+        "ev-priority_queue_main_effect-validation-0026",
+        "ev-priority_queue_main_effect-validation-0027",
+        "ev-priority_queue_main_effect-validation-0028",
+        "ev-priority_queue_main_effect-validation-0029",
+        "ev-priority_queue_main_effect-validation-0030",
+        "ev-priority_queue_main_effect-validation-0031",
+        "ev-priority_queue_main_effect-validation-0032",
+        "ev-priority_queue_main_effect-validation-0033",
+        "ev-priority_queue_main_effect-validation-0034",
+        "ev-priority_queue_main_effect-validation-0035",
+        "ev-priority_queue_main_effect-validation-0036"
+      ],
+      "mean_effect": 6.0,
+      "pair_count": 6,
+      "reason": "held-out effect direction, uncertainty, replication, practical-impact and context-diversity criteria passed",
+      "replicate_effects": [
+        5.800000000000001,
+        6.0,
+        6.199999999999999,
+        5.900000000000002,
+        6.100000000000001,
+        6.0
+      ],
+      "sample_sd_effect": 0.141421356237309,
+      "spec_id": "priority_queue_main_effect",
+      "status": "validated",
+      "target_metric": "queue_growth",
+      "target_unit": "tasks",
+      "validated_scenarios": [
+        "warehouse-layout-b",
+        "warehouse-task-mix-c"
+      ]
+    },
+    {
+      "candidate_id": "cand-222222222222222222222222",
+      "candidate_kind": "interaction",
+      "concordant_fraction": 1.0,
+      "confidence_interval_95_high": 4.171164538820299,
+      "confidence_interval_95_low": 3.8621687945130345,
+      "criteria_snapshot": {
+        "candidate_discovery_effect": 4.1,
+        "confidence_method": "two-sided 95% Student-t interval; exact tabulated critical values through df=30, Cornish-Fisher approximation thereafter",
+        "distinct_initial_state_count": 2,
+        "distinct_scenario_count": 2,
+        "distinct_task_pattern_count": 2,
+        "distinct_workload_pattern_count": 2,
+        "expected_effect_sign": "positive",
+        "factor_levels": {
+          "junction_occupancy": {
+            "high": 0.7,
+            "low": 0.1
+          },
+          "priority_ratio": {
+            "high": 0.8,
+            "low": 0.2
+          }
+        },
+        "minimum_absolute_effect": 1.5,
+        "minimum_concordant_fraction": 0.8,
+        "minimum_distinct_initial_states": 2,
+        "minimum_distinct_scenarios": 2,
+        "minimum_distinct_task_patterns": 2,
+        "minimum_distinct_workload_patterns": 2,
+        "minimum_effect_retention_fraction": 0.25,
+        "minimum_replicates": 6,
+        "predeclared_direction": "positive",
+        "spec_id": "junction_priority_interaction"
+      },
+      "distinct_initial_states": 2,
+      "distinct_task_patterns": 2,
+      "distinct_workload_patterns": 2,
+      "effect_retention_fraction": 0.9796747967479675,
+      "evidence_ids": [
+        "ev-junction_priority_interaction-validation-0037",
+        "ev-junction_priority_interaction-validation-0038",
+        "ev-junction_priority_interaction-validation-0039",
+        "ev-junction_priority_interaction-validation-0040",
+        "ev-junction_priority_interaction-validation-0041",
+        "ev-junction_priority_interaction-validation-0042",
+        "ev-junction_priority_interaction-validation-0043",
+        "ev-junction_priority_interaction-validation-0044",
+        "ev-junction_priority_interaction-validation-0045",
+        "ev-junction_priority_interaction-validation-0046",
+        "ev-junction_priority_interaction-validation-0047",
+        "ev-junction_priority_interaction-validation-0048",
+        "ev-junction_priority_interaction-validation-0049",
+        "ev-junction_priority_interaction-validation-0050",
+        "ev-junction_priority_interaction-validation-0051",
+        "ev-junction_priority_interaction-validation-0052",
+        "ev-junction_priority_interaction-validation-0053",
+        "ev-junction_priority_interaction-validation-0054",
+        "ev-junction_priority_interaction-validation-0055",
+        "ev-junction_priority_interaction-validation-0056",
+        "ev-junction_priority_interaction-validation-0057",
+        "ev-junction_priority_interaction-validation-0058",
+        "ev-junction_priority_interaction-validation-0059",
+        "ev-junction_priority_interaction-validation-0060"
+      ],
+      "mean_effect": 4.016666666666667,
+      "pair_count": 6,
+      "reason": "held-out effect direction, uncertainty, replication, practical-impact and context-diversity criteria passed",
+      "replicate_effects": [
+        3.8999999999999986,
+        4.100000000000001,
+        4.0,
+        4.199999999999999,
+        3.8000000000000007,
+        4.100000000000001
+      ],
+      "sample_sd_effect": 0.1471960144387976,
+      "spec_id": "junction_priority_interaction",
+      "status": "validated",
+      "target_metric": "queue_growth",
+      "target_unit": "tasks",
+      "validated_scenarios": [
+        "warehouse-layout-b",
+        "warehouse-task-mix-c"
+      ]
+    }
+  ],
+  "schema_version": "1.0.0",
+  "status": "independent_validation_report",
+  "training_splits_excluded_from_estimation": [
+    "discovery",
+    "selection"
+  ],
+  "validation_config_id": "session12-independent-validation-v1",
+  "validation_config_sha256": "9efde7c7726a9568c4a424aab93d4544cad3581f7dd0bb7070651234e250daf0"
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "policy-replay-report.v1.schema.json",
+  "title": "RESILIANT-Z Session 14 Policy Replay Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "report_id", "report_status", "candidate_effect_status", "operational_review_status", "knowledge_id", "proposal_id", "blocker_codes", "source_sha256", "pair_audit", "live_policy_modified", "automatic_application_allowed", "human_approval_required", "limitations"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "report_id": {"type": "string", "pattern": "^replayreport-[0-9a-f]{24}$"},
+    "report_status": {"enum": ["blocked", "analyzed"]},
+    "candidate_effect_status": {"enum": ["not_analyzed", "insufficient_pairs", "candidate_benefit_observed", "candidate_regression_observed", "inconclusive"]},
+    "operational_review_status": {"enum": ["blocked_policy_gate", "blocked_guardrails_unmeasured", "blocked_guardrail_regression", "not_eligible_for_review", "eligible_for_human_review_not_applied"]},
+    "knowledge_id": {"type": "string"}, "proposal_id": {"type": "string"},
+    "policy_parameter_id": {"type": ["string", "null"]}, "current_value": {"type": ["number", "null"]}, "proposed_value": {"type": ["number", "null"]},
+    "blocker_codes": {"type": "array", "items": {"type": "string"}},
+    "source_sha256": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+    "pair_audit": {"type": "array", "items": {"type": "object"}},
+    "paired_summary": {"type": ["object", "null"]}, "guardrails": {"type": "array", "items": {"type": "object"}},
+    "live_policy_modified": {"const": false}, "automatic_application_allowed": {"const": false}, "human_approval_required": {"const": true},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

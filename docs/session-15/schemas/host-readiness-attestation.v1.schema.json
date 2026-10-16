@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Operator-supplied host facts; the auditor does not autodetect or verify hardware.",
+  "properties": {
+    "asset_manifest_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Asset Manifest Sha256"
+    },
+    "assets_checksums_confirmed": {
+      "title": "Assets Checksums Confirmed",
+      "type": "boolean"
+    },
+    "checked_at_utc": {
+      "format": "date-time",
+      "title": "Checked At Utc",
+      "type": "string"
+    },
+    "checked_by": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Checked By",
+      "type": "string"
+    },
+    "confirmation_is_operator_attestation": {
+      "const": true,
+      "default": true,
+      "title": "Confirmation Is Operator Attestation",
+      "type": "boolean"
+    },
+    "driver_compatibility_confirmed": {
+      "title": "Driver Compatibility Confirmed",
+      "type": "boolean"
+    },
+    "driver_version": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Driver Version",
+      "type": "string"
+    },
+    "free_disk_gb": {
+      "exclusiveMinimum": 0,
+      "maximum": 100000,
+      "title": "Free Disk Gb",
+      "type": "number"
+    },
+    "gpu_model": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Gpu Model",
+      "type": "string"
+    },
+    "gpu_vram_gb": {
+      "exclusiveMinimum": 0,
+      "maximum": 512,
+      "title": "Gpu Vram Gb",
+      "type": "number"
+    },
+    "host_label": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Host Label",
+      "type": "string"
+    },
+    "official_requirements_reviewed": {
+      "title": "Official Requirements Reviewed",
+      "type": "boolean"
+    },
+    "os_compatibility_confirmed": {
+      "title": "Os Compatibility Confirmed",
+      "type": "boolean"
+    },
+    "os_release": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Os Release",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "simulator_release": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Simulator Release",
+      "type": "string"
+    },
+    "system_ram_gb": {
+      "exclusiveMinimum": 0,
+      "maximum": 2048,
+      "title": "System Ram Gb",
+      "type": "number"
+    }
+  },
+  "required": [
+    "host_label",
+    "checked_at_utc",
+    "checked_by",
+    "os_release",
+    "os_compatibility_confirmed",
+    "gpu_model",
+    "gpu_vram_gb",
+    "driver_version",
+    "driver_compatibility_confirmed",
+    "system_ram_gb",
+    "free_disk_gb",
+    "simulator_release",
+    "official_requirements_reviewed",
+    "assets_checksums_confirmed"
+  ],
+  "title": "HostReadinessAttestation",
+  "type": "object"
+}

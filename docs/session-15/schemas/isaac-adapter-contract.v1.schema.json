@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Versioned contract only; this is not a working Isaac Sim adapter.",
+  "properties": {
+    "adapter_contract_version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Adapter Contract Version",
+      "type": "string"
+    },
+    "adapter_id": {
+      "const": "resiliant-z.isaac-adapter-contract",
+      "default": "resiliant-z.isaac-adapter-contract",
+      "title": "Adapter Id",
+      "type": "string"
+    },
+    "adapter_runtime_status": {
+      "const": "not_started",
+      "default": "not_started",
+      "title": "Adapter Runtime Status",
+      "type": "string"
+    },
+    "automatic_execution_allowed": {
+      "const": false,
+      "default": false,
+      "title": "Automatic Execution Allowed",
+      "type": "boolean"
+    },
+    "host_launch_authorized": {
+      "const": false,
+      "default": false,
+      "title": "Host Launch Authorized",
+      "type": "boolean"
+    },
+    "implementation_status": {
+      "const": "contract_only_not_implemented",
+      "default": "contract_only_not_implemented",
+      "title": "Implementation Status",
+      "type": "string"
+    },
+    "required_capabilities": {
+      "default": [
+        "deterministic_seed_control",
+        "scenario_reset",
+        "timestamped_metrics",
+        "run_metadata_export",
+        "clean_shutdown"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Capabilities",
+      "type": "array"
+    },
+    "scenario_schema_versions": {
+      "default": [
+        "1.0.0"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Scenario Schema Versions",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "telemetry_schema_versions": {
+      "default": [
+        "1.0.0"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Telemetry Schema Versions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "adapter_contract_version"
+  ],
+  "title": "IsaacAdapterContract",
+  "type": "object"
+}

@@ -1,0 +1,468 @@
+{
+  "$defs": {
+    "Condition": {
+      "additionalProperties": false,
+      "properties": {
+        "variable_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Variable Id",
+          "type": "string"
+        },
+        "minimum_observed": {
+          "title": "Minimum Observed",
+          "type": "number"
+        },
+        "maximum_observed": {
+          "title": "Maximum Observed",
+          "type": "number"
+        },
+        "unit": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "calibration_status": {
+          "enum": [
+            "synthetic_uncalibrated",
+            "measured_unverified",
+            "calibrated"
+          ],
+          "title": "Calibration Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "variable_id",
+        "minimum_observed",
+        "maximum_observed",
+        "unit",
+        "calibration_status"
+      ],
+      "title": "Condition",
+      "type": "object"
+    },
+    "KnowledgeRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "knowledge_id": {
+          "pattern": "^know-[0-9a-f]{24}$",
+          "title": "Knowledge Id",
+          "type": "string"
+        },
+        "spec_id": {
+          "title": "Spec Id",
+          "type": "string"
+        },
+        "candidate_id": {
+          "pattern": "^cand-[0-9a-f]{24}$",
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "phenomenon": {
+          "title": "Phenomenon",
+          "type": "string"
+        },
+        "candidate_kind": {
+          "enum": [
+            "main_effect",
+            "interaction"
+          ],
+          "title": "Candidate Kind",
+          "type": "string"
+        },
+        "lifecycle_status": {
+          "enum": [
+            "validated_scoped",
+            "rejected",
+            "inconclusive",
+            "invalidated",
+            "rolled_back"
+          ],
+          "title": "Lifecycle Status",
+          "type": "string"
+        },
+        "validation_status": {
+          "enum": [
+            "validated",
+            "rejected",
+            "inconclusive",
+            "invalidated"
+          ],
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "validation_reason": {
+          "title": "Validation Reason",
+          "type": "string"
+        },
+        "target_metric": {
+          "title": "Target Metric",
+          "type": "string"
+        },
+        "target_unit": {
+          "title": "Target Unit",
+          "type": "string"
+        },
+        "effect_direction": {
+          "title": "Effect Direction",
+          "type": "string"
+        },
+        "mean_effect": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Effect"
+        },
+        "sample_sd_effect": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sample Sd Effect"
+        },
+        "confidence_interval_95_low": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Interval 95 Low"
+        },
+        "confidence_interval_95_high": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Interval 95 High"
+        },
+        "concordant_fraction": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Concordant Fraction"
+        },
+        "effect_retention_fraction": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effect Retention Fraction"
+        },
+        "pair_count": {
+          "minimum": 0,
+          "title": "Pair Count",
+          "type": "integer"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Conditions",
+          "type": "array"
+        },
+        "validated_scenarios": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Validated Scenarios",
+          "type": "array"
+        },
+        "distinct_initial_states": {
+          "minimum": 0,
+          "title": "Distinct Initial States",
+          "type": "integer"
+        },
+        "distinct_task_patterns": {
+          "minimum": 0,
+          "title": "Distinct Task Patterns",
+          "type": "integer"
+        },
+        "distinct_workload_patterns": {
+          "minimum": 0,
+          "title": "Distinct Workload Patterns",
+          "type": "integer"
+        },
+        "operational_gate_status": {
+          "enum": [
+            "blocked",
+            "eligible_for_policy_review"
+          ],
+          "title": "Operational Gate Status",
+          "type": "string"
+        },
+        "operational_gate_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Operational Gate Reasons",
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/RecordProvenance"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Limitations",
+          "type": "array"
+        },
+        "created_at_utc": {
+          "title": "Created At Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "knowledge_id",
+        "spec_id",
+        "candidate_id",
+        "phenomenon",
+        "candidate_kind",
+        "lifecycle_status",
+        "validation_status",
+        "validation_reason",
+        "target_metric",
+        "target_unit",
+        "effect_direction",
+        "pair_count",
+        "conditions",
+        "validated_scenarios",
+        "distinct_initial_states",
+        "distinct_task_patterns",
+        "distinct_workload_patterns",
+        "operational_gate_status",
+        "operational_gate_reasons",
+        "provenance",
+        "limitations",
+        "created_at_utc"
+      ],
+      "title": "KnowledgeRecord",
+      "type": "object"
+    },
+    "LifecycleEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "event_id": {
+          "pattern": "^kwevent-[0-9a-f]{24}$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "enum": [
+            "invalidate",
+            "rollback"
+          ],
+          "title": "Event Type",
+          "type": "string"
+        },
+        "knowledge_id": {
+          "pattern": "^know-[0-9a-f]{24}$",
+          "title": "Knowledge Id",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "restores_knowledge_id": {
+          "anyOf": [
+            {
+              "pattern": "^know-[0-9a-f]{24}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Restores Knowledge Id"
+        },
+        "created_at_utc": {
+          "title": "Created At Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "knowledge_id",
+        "reason",
+        "created_at_utc"
+      ],
+      "title": "LifecycleEvent",
+      "type": "object"
+    },
+    "RecordProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "discovery_batch_id": {
+          "title": "Discovery Batch Id",
+          "type": "string"
+        },
+        "candidate_report_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Report Sha256",
+          "type": "string"
+        },
+        "validation_report_id": {
+          "title": "Validation Report Id",
+          "type": "string"
+        },
+        "validation_report_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Validation Report Sha256",
+          "type": "string"
+        },
+        "validation_config_id": {
+          "title": "Validation Config Id",
+          "type": "string"
+        },
+        "validation_config_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Validation Config Sha256",
+          "type": "string"
+        },
+        "observation_input_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Observation Input Sha256",
+          "type": "string"
+        },
+        "backend_id": {
+          "title": "Backend Id",
+          "type": "string"
+        },
+        "evidence_label": {
+          "title": "Evidence Label",
+          "type": "string"
+        },
+        "model_version": {
+          "title": "Model Version",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 1500,
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "discovery_batch_id",
+        "candidate_report_sha256",
+        "validation_report_id",
+        "validation_report_sha256",
+        "validation_config_id",
+        "validation_config_sha256",
+        "observation_input_sha256",
+        "backend_id",
+        "evidence_label",
+        "model_version",
+        "evidence_ids"
+      ],
+      "title": "RecordProvenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "entry_type": {
+      "enum": [
+        "knowledge_record",
+        "lifecycle_event"
+      ],
+      "title": "Entry Type",
+      "type": "string"
+    },
+    "entry_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Entry Sha256",
+      "type": "string"
+    },
+    "record": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/KnowledgeRecord"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "event": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LifecycleEvent"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "entry_type",
+    "entry_sha256"
+  ],
+  "title": "LedgerEntryView",
+  "type": "object"
+}

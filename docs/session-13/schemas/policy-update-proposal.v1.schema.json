@@ -1,0 +1,175 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "proposal_id": {
+      "pattern": "^polprop-[0-9a-f]{24}$",
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "approval_required",
+        "blocked_lifecycle",
+        "blocked_operational_provenance",
+        "blocked_no_policy_rule",
+        "blocked_effect_gate",
+        "blocked_out_of_bounds"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "knowledge_id": {
+      "pattern": "^know-[0-9a-f]{24}$",
+      "title": "Knowledge Id",
+      "type": "string"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "policy_parameter_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Parameter Id"
+    },
+    "current_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Current Value"
+    },
+    "proposed_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proposed Value"
+    },
+    "update_direction": {
+      "anyOf": [
+        {
+          "enum": [
+            "increase",
+            "decrease"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Update Direction"
+    },
+    "mean_effect": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mean Effect"
+    },
+    "target_metric": {
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "target_unit": {
+      "title": "Target Unit",
+      "type": "string"
+    },
+    "reason_codes": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Reason Codes",
+      "type": "array"
+    },
+    "source_candidate_report_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Candidate Report Sha256",
+      "type": "string"
+    },
+    "source_validation_report_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Validation Report Sha256",
+      "type": "string"
+    },
+    "policy_config_id": {
+      "title": "Policy Config Id",
+      "type": "string"
+    },
+    "policy_config_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Policy Config Sha256",
+      "type": "string"
+    },
+    "human_approval_required": {
+      "const": true,
+      "default": true,
+      "title": "Human Approval Required",
+      "type": "boolean"
+    },
+    "automatic_application_allowed": {
+      "const": false,
+      "default": false,
+      "title": "Automatic Application Allowed",
+      "type": "boolean"
+    },
+    "applied": {
+      "const": false,
+      "default": false,
+      "title": "Applied",
+      "type": "boolean"
+    },
+    "created_at_utc": {
+      "title": "Created At Utc",
+      "type": "string"
+    }
+  },
+  "required": [
+    "proposal_id",
+    "status",
+    "knowledge_id",
+    "spec_id",
+    "target_metric",
+    "target_unit",
+    "reason_codes",
+    "source_candidate_report_sha256",
+    "source_validation_report_sha256",
+    "policy_config_id",
+    "policy_config_sha256",
+    "created_at_utc"
+  ],
+  "title": "PolicyProposal",
+  "type": "object"
+}

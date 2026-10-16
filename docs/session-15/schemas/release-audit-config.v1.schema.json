@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Conservative software-audit configuration; core checks cannot be removed.",
+  "properties": {
+    "additional_required_paths": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Additional Required Paths",
+      "type": "array"
+    },
+    "max_json_file_bytes": {
+      "default": 5000000,
+      "maximum": 25000000,
+      "minimum": 1024,
+      "title": "Max Json File Bytes",
+      "type": "integer"
+    },
+    "require_clean_tracked_diff": {
+      "default": false,
+      "title": "Require Clean Tracked Diff",
+      "type": "boolean"
+    },
+    "scan_json_directories": {
+      "default": [
+        "configs",
+        "docs"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Scan Json Directories",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "ReleaseAuditConfig",
+  "type": "object"
+}

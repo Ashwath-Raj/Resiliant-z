@@ -1,0 +1,144 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "observation_id": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$",
+      "title": "Observation Id",
+      "type": "string"
+    },
+    "evidence_id": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Evidence Id",
+      "type": "string"
+    },
+    "run_id": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "seed": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "split": {
+      "enum": [
+        "discovery",
+        "selection",
+        "validation",
+        "replay"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "scenario_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "backend_id": {
+      "enum": [
+        "discrete_event",
+        "surrogate"
+      ],
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "evidence_label": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Evidence Label",
+      "type": "string"
+    },
+    "metric_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Metric Id",
+      "type": "string"
+    },
+    "metric_unit": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Metric Unit",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Value"
+    },
+    "quality": {
+      "enum": [
+        "measured",
+        "missing",
+        "stale",
+        "not_applicable",
+        "not_measured"
+      ],
+      "title": "Quality",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "factor_values": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "maxProperties": 50,
+      "title": "Factor Values",
+      "type": "object"
+    },
+    "model_version": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Model Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "observation_id",
+    "evidence_id",
+    "run_id",
+    "seed",
+    "split",
+    "scenario_id",
+    "backend_id",
+    "evidence_label",
+    "metric_id",
+    "metric_unit",
+    "quality",
+    "model_version"
+  ],
+  "title": "DiscoveryObservation",
+  "type": "object"
+}

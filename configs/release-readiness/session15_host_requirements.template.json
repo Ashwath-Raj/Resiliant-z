@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "target_simulator_release": "REPLACE_WITH_EXACT_RELEASE_AFTER_OFFICIAL_REQUIREMENTS_REVIEW",
+  "minimum_system_ram_gb": 32,
+  "minimum_gpu_vram_gb": 16,
+  "minimum_free_disk_gb": 50,
+  "require_driver_compatibility_confirmation": true,
+  "require_os_compatibility_confirmation": true,
+  "require_assets_checksum_confirmation": true
+}
