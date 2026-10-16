@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "warehouse_priority_junction_v1",
+  "backend": "discrete_event",
+  "backend_mode": "local_cpu",
+  "evidence_label": "LOCAL DISCRETE-EVENT FLEET MODEL — NOT ISAAC SIM",
+  "randomness": {
+    "paired_seed_policy": "common_random_numbers",
+    "discovery_validation_seeds_disjoint": true
+  },
+  "metrics": {
+    "deadlock_events": "unmeasured_if_backend_does_not_instrument",
+    "wait_mean_excludes_not_started_tasks": true,
+    "not_started_tasks_reported_separately": true
+  }
+}

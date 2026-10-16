@@ -28,14 +28,24 @@ def test_discrete_event_metrics_are_seed_deterministic():
     assert first.backend == "discrete_event"
     assert first.metrics.throughput_tasks_per_min > 0
     assert first.metrics.junction_occupancy <= 1
+    assert first.metrics.deadlock_events is None
+    assert first.ended_at is not None
     assert any("physics-based digital twin" in note for note in first.notes)
 
 
 def test_low_demand_has_less_junction_pressure_than_high_priority_overload():
     sim = DiscreteEventFleetSimulator()
     manifests = factorial_manifests(stage="discovery", seeds_per_cell=5, first_seed=9000)
-    low = [m for m in manifests if m.parameters.traffic_demand == 0.55 and m.parameters.priority_ratio == 0.15]
-    high = [m for m in manifests if m.parameters.traffic_demand == 1.05 and m.parameters.priority_ratio == 0.50]
+    low = [
+        m
+        for m in manifests
+        if m.parameters.traffic_demand == 0.55 and m.parameters.priority_ratio == 0.15
+    ]
+    high = [
+        m
+        for m in manifests
+        if m.parameters.traffic_demand == 1.05 and m.parameters.priority_ratio == 0.50
+    ]
     low_runs = [sim.run(m) for m in low]
     high_runs = [sim.run(m) for m in high]
     mean_low_occ = sum(r.metrics.junction_occupancy for r in low_runs) / len(low_runs)

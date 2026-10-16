@@ -1,0 +1,181 @@
+{
+  "$defs": {
+    "MetricObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "unit": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "quality": {
+          "enum": [
+            "measured",
+            "missing",
+            "stale",
+            "not_applicable",
+            "not_measured"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "unit",
+        "quality"
+      ],
+      "title": "MetricObservation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Normalized JSON result payload, stored separately and hashed by its receipt.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "pattern": "^run-[0-9a-f]{24}$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^plan-[0-9a-f]{24}$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "request_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Request Sha256",
+      "type": "string"
+    },
+    "scenario_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "scenario_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Scenario Sha256",
+      "type": "string"
+    },
+    "backend_id": {
+      "enum": [
+        "discrete_event",
+        "surrogate"
+      ],
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "split": {
+      "enum": [
+        "discovery",
+        "selection",
+        "validation",
+        "replay"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "arm_id": {
+      "enum": [
+        "control",
+        "treatment"
+      ],
+      "title": "Arm Id",
+      "type": "string"
+    },
+    "replicate_index": {
+      "maximum": 99,
+      "minimum": 0,
+      "title": "Replicate Index",
+      "type": "integer"
+    },
+    "seed": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "target_metric": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "status": {
+      "const": "succeeded",
+      "default": "succeeded",
+      "title": "Status",
+      "type": "string"
+    },
+    "metrics": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MetricObservation"
+      },
+      "maxProperties": 100,
+      "minProperties": 1,
+      "title": "Metrics",
+      "type": "object"
+    },
+    "evidence_label": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Evidence Label",
+      "type": "string"
+    },
+    "finished_at_utc": {
+      "format": "date-time",
+      "title": "Finished At Utc",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "plan_id",
+    "request_sha256",
+    "scenario_id",
+    "scenario_sha256",
+    "backend_id",
+    "split",
+    "arm_id",
+    "replicate_index",
+    "seed",
+    "target_metric",
+    "metrics",
+    "evidence_label",
+    "finished_at_utc"
+  ],
+  "title": "RunResultArtifact",
+  "type": "object"
+}

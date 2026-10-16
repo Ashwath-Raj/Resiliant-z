@@ -19,6 +19,8 @@ def test_surrogate_is_seed_deterministic_for_metrics():
     second = simulator.run(manifest)
     assert first.metrics == second.metrics
     assert first.backend == "surrogate"
+    assert first.metrics.deadlock_events is None
+    assert first.ended_at is not None
     assert any("did not execute in NVIDIA Isaac Sim" in note for note in first.notes)
 
 

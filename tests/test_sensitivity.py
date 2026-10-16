@@ -34,12 +34,16 @@ def test_sensitivity_sweeps_costs_with_paired_policies_and_writes_artifacts(tmp_
     assert with_detour["policies"]["baseline"]["mean_bypass_detour_total_seconds"] == 0.0
     assert no_detour["policies"]["static"]["mean_bypass_detour_total_seconds"] == 0.0
     assert with_detour["policies"]["static"]["mean_bypass_detour_total_seconds"] > 0.0
-    assert with_detour["paired_comparisons"]["conditioned_vs_static"][
-        "policy_objective_score"
-    ]["paired_seed_count"] == 3
-    assert with_detour["objective_score_effect_vs_zero_detour"]["conditioned"][
-        "paired_seed_count"
-    ] == 3
+    assert (
+        with_detour["paired_comparisons"]["conditioned_vs_static"]["policy_objective_score"][
+            "paired_seed_count"
+        ]
+        == 3
+    )
+    assert (
+        with_detour["objective_score_effect_vs_zero_detour"]["conditioned"]["paired_seed_count"]
+        == 3
+    )
 
     # With no bypasses the detour assumption is inert, so the reference baseline
     # should be identical at each cost level for the same paired seeds.

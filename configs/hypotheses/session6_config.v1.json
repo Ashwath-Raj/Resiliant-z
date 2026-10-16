@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "max_hypotheses": 3,
+  "max_attempts": 2,
+  "timeout_seconds": 12.0,
+  "max_response_bytes": 32768,
+  "max_request_bytes": 32768
+}

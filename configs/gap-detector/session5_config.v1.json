@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "detector_id": "session5-example-queue-gap-detector",
+  "history_limit": 1000,
+  "rules": {
+    "queue_length": {
+      "absolute_residual_threshold": 3.0,
+      "standardized_residual_threshold": 1.5,
+      "consecutive_breach_windows": 2,
+      "consecutive_clear_windows": 2
+    }
+  }
+}

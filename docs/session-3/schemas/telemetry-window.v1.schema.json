@@ -1,0 +1,152 @@
+{
+  "$defs": {
+    "NumericObservation": {
+      "additionalProperties": false,
+      "description": "One metric value, or an explicit explanation for why it is unavailable.",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "unit": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "quality": {
+          "enum": [
+            "measured",
+            "missing",
+            "stale",
+            "not_applicable",
+            "not_measured"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "unit",
+        "quality"
+      ],
+      "title": "NumericObservation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A window of interval counts and interval-mean state measurements.\n\nTask arrival/start/completion fields are counts of events in this interval.\nRobot counts, queue length, priority ratio and junction metrics are interval\nmeans. Each record uses a half-open interval [window_start, window_end).",
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "backend_id": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "window_start": {
+      "format": "date-time",
+      "title": "Window Start",
+      "type": "string"
+    },
+    "window_end": {
+      "format": "date-time",
+      "title": "Window End",
+      "type": "string"
+    },
+    "sampling_interval_s": {
+      "exclusiveMinimum": 0,
+      "maximum": 86400,
+      "title": "Sampling Interval S",
+      "type": "number"
+    },
+    "active_robots": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "idle_robots": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "tasks_arrived": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "tasks_started": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "tasks_completed": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "queue_length": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "priority_ratio": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "junction_occupancy": {
+      "$ref": "#/$defs/NumericObservation"
+    },
+    "junction_pressure": {
+      "$ref": "#/$defs/NumericObservation"
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario_id",
+    "backend_id",
+    "window_start",
+    "window_end",
+    "sampling_interval_s",
+    "active_robots",
+    "idle_robots",
+    "tasks_arrived",
+    "tasks_started",
+    "tasks_completed",
+    "queue_length",
+    "priority_ratio",
+    "junction_occupancy",
+    "junction_pressure"
+  ],
+  "title": "RESILIANT-Z Telemetry Window v1.0",
+  "type": "object",
+  "$id": "https://resiliant-z.local/schemas/telemetry-window.v1.schema.json"
+}

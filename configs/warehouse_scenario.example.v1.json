@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "scenario_id": "warehouse-cross-aisles-synthetic-v1",
+  "name": "Synthetic cross-aisle warehouse scenario",
+  "purpose": "Backend-independent spatial design for future controlled multi-robot experiments. This geometry is illustrative and not calibrated to a real warehouse.",
+  "evidence_label": "LOCAL DISCRETE-EVENT FLEET MODEL — NOT ISAAC SIM",
+  "layout": {
+    "coordinate_unit": "m",
+    "angle_unit": "rad",
+    "nodes": [
+      {"node_id": "A1_W", "role": "aisle", "x_m": 0.0, "y_m": 0.0},
+      {"node_id": "A1_E", "role": "aisle", "x_m": 12.0, "y_m": 0.0},
+      {"node_id": "A2_E", "role": "aisle", "x_m": 24.0, "y_m": 0.0},
+      {"node_id": "I1", "role": "intersection", "x_m": 12.0, "y_m": 6.0},
+      {"node_id": "I2", "role": "intersection", "x_m": 24.0, "y_m": 6.0},
+      {"node_id": "I3", "role": "intersection", "x_m": 12.0, "y_m": -6.0},
+      {"node_id": "PICKUP_IN", "role": "station", "x_m": 0.0, "y_m": 6.0},
+      {"node_id": "DROPOFF_A", "role": "station", "x_m": 24.0, "y_m": 12.0},
+      {"node_id": "DROPOFF_B", "role": "station", "x_m": 24.0, "y_m": -12.0},
+      {"node_id": "CHARGE_1", "role": "charger", "x_m": 0.0, "y_m": -6.0},
+      {"node_id": "SPAWN_1", "role": "spawn", "x_m": 0.0, "y_m": -12.0},
+      {"node_id": "SPAWN_2", "role": "spawn", "x_m": 5.0, "y_m": -12.0}
+    ],
+    "aisles": [
+      {"aisle_id": "AISLE_MAIN_WEST", "start_node_id": "A1_W", "end_node_id": "A1_E", "length_m": 12.0, "width_m": 3.0},
+      {"aisle_id": "AISLE_MAIN_EAST", "start_node_id": "A1_E", "end_node_id": "A2_E", "length_m": 12.0, "width_m": 3.0},
+      {"aisle_id": "CROSS_AISLE_NORTH_WEST", "start_node_id": "PICKUP_IN", "end_node_id": "I1", "length_m": 12.0, "width_m": 3.0},
+      {"aisle_id": "CROSS_AISLE_NORTH_EAST", "start_node_id": "I1", "end_node_id": "I2", "length_m": 12.0, "width_m": 3.0},
+      {"aisle_id": "CROSS_AISLE_SOUTH_WEST", "start_node_id": "CHARGE_1", "end_node_id": "I3", "length_m": 12.0, "width_m": 3.0},
+      {"aisle_id": "CROSS_AISLE_SOUTH_EAST", "start_node_id": "I3", "end_node_id": "A2_E", "length_m": 14.4, "width_m": 3.0},
+      {"aisle_id": "NORTH_DROPOFF_LINK", "start_node_id": "I2", "end_node_id": "DROPOFF_A", "length_m": 6.0, "width_m": 3.0},
+      {"aisle_id": "SOUTH_DROPOFF_LINK", "start_node_id": "A2_E", "end_node_id": "DROPOFF_B", "length_m": 12.0, "width_m": 3.0},
+      {"aisle_id": "ROBOT_STAGING_LINK", "start_node_id": "CHARGE_1", "end_node_id": "SPAWN_1", "length_m": 6.0, "width_m": 3.0},
+      {"aisle_id": "ROBOT_STAGING_CROSS_LINK", "start_node_id": "SPAWN_1", "end_node_id": "SPAWN_2", "length_m": 5.0, "width_m": 3.0}
+    ],
+    "shelves": [
+      {"shelf_id": "SHELF_WEST_LEFT", "aisle_id": "AISLE_MAIN_WEST", "side": "left", "length_m": 8.0},
+      {"shelf_id": "SHELF_WEST_RIGHT", "aisle_id": "AISLE_MAIN_WEST", "side": "right", "length_m": 8.0},
+      {"shelf_id": "SHELF_EAST_LEFT", "aisle_id": "AISLE_MAIN_EAST", "side": "left", "length_m": 9.0},
+      {"shelf_id": "SHELF_EAST_RIGHT", "aisle_id": "AISLE_MAIN_EAST", "side": "right", "length_m": 9.0}
+    ],
+    "intersections": [
+      {"intersection_id": "JUNCTION_1", "node_id": "I1", "conflict_zone_id": "CONFLICT_1"},
+      {"intersection_id": "JUNCTION_2", "node_id": "I2", "conflict_zone_id": "CONFLICT_2"},
+      {"intersection_id": "JUNCTION_3", "node_id": "I3", "conflict_zone_id": "CONFLICT_3"}
+    ],
+    "task_stations": [
+      {"station_id": "INBOUND_PICKUP", "node_id": "PICKUP_IN", "role": "pickup", "service_time_s": 15.0},
+      {"station_id": "OUTBOUND_DROPOFF_A", "node_id": "DROPOFF_A", "role": "dropoff", "service_time_s": 20.0},
+      {"station_id": "OUTBOUND_DROPOFF_B", "node_id": "DROPOFF_B", "role": "dropoff", "service_time_s": 20.0}
+    ],
+    "charging_areas": [
+      {"charging_area_id": "CHARGING_BANK_A", "node_id": "CHARGE_1", "charger_bays": 2}
+    ],
+    "robot_spawns": [
+      {"spawn_id": "ROBOT_SPAWN_1", "node_id": "SPAWN_1", "x_m": 0.0, "y_m": -12.0, "yaw_rad": 1.5707963267948966},
+      {"spawn_id": "ROBOT_SPAWN_2", "node_id": "SPAWN_2", "x_m": 5.0, "y_m": -12.0, "yaw_rad": 1.5707963267948966}
+    ]
+  },
+  "scenario_factors": [
+    {"factor_id": "traffic_demand", "unit": "dimensionless workload multiplier; not tasks/minute", "min_value": 0.4, "max_value": 1.2, "test_levels": [0.55, 1.05], "calibration_status": "synthetic_uncalibrated"},
+    {"factor_id": "priority_ratio", "unit": "fraction of arriving tasks", "min_value": 0.1, "max_value": 0.6, "test_levels": [0.15, 0.5], "calibration_status": "synthetic_uncalibrated"}
+  ],
+  "policy_parameters": [
+    {"parameter_id": "bypass_ratio", "unit": "fraction of jobs assigned to the bypass route", "min_value": 0.0, "max_value": 0.5, "default_value": 0.0, "candidate_values": [0.0, 0.15, 0.3, 0.45], "calibration_status": "synthetic_uncalibrated"}
+  ],
+  "policy_mode_choices": ["static", "conditioned"],
+  "notes": [
+    "All layout dimensions and station service times are illustrative synthetic values, not measured or calibrated warehouse data.",
+    "The current local discrete-event backend models queueing and service capacity; it does not execute this geometry.",
+    "This file specifies a future independent scenario contract; it does not install, import, or launch Isaac Sim.",
+    "Do not claim collision, kinematic, sensing, contact, battery, or physical deadlock validation from this scenario file."
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resiliant-z.local/schemas/run-result.v1.schema.json",
+  "title": "RESILIANT Simulation Run v1 (target contract)",
+  "description": "Versioned run result envelope. The Pydantic compatibility layer fills defaults when reading older payloads; new exports include the complete v1 shape.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "experiment", "backend", "backend_version", "metrics", "status", "started_at", "ended_at", "notes", "failure_reason", "log_artifact", "provenance"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "minLength": 1},
+    "experiment": {"$ref": "run-manifest.v1.schema.json"},
+    "backend": {"enum": ["surrogate", "discrete_event", "isaac_sim_import"]},
+    "backend_version": {"type": ["string", "null"]},
+    "status": {"enum": ["completed", "failed", "timeout", "incomplete", "invalidated"]},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "ended_at": {"type": ["string", "null"], "format": "date-time"},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["throughput_tasks_per_min", "average_wait_seconds", "queue_growth_per_min", "junction_occupancy", "deadlock_events"],
+      "properties": {
+        "throughput_tasks_per_min": {"type": ["number", "null"], "minimum": 0},
+        "average_wait_seconds": {"type": ["number", "null"], "minimum": 0},
+        "queue_growth_per_min": {"type": ["number", "null"]},
+        "junction_occupancy": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "deadlock_events": {"type": ["integer", "null"], "minimum": 0},
+        "task_arrivals": {"type": ["integer", "null"], "minimum": 0},
+        "task_completions": {"type": ["integer", "null"], "minimum": 0},
+        "route_service_started_count": {"type": ["integer", "null"], "minimum": 0},
+        "tasks_not_started_by_horizon": {"type": ["integer", "null"], "minimum": 0},
+        "route_service_wait_total_seconds": {"type": ["number", "null"], "minimum": 0},
+        "censored_wait_observation_seconds": {"type": ["number", "null"], "minimum": 0},
+        "bypass_task_count": {"type": ["integer", "null"], "minimum": 0},
+        "bypass_detour_total_seconds": {"type": ["number", "null"], "minimum": 0},
+        "high_risk_context_arrival_count": {"type": ["integer", "null"], "minimum": 0},
+        "conditional_policy_trigger_count": {"type": ["integer", "null"], "minimum": 0}
+      }
+    },
+    "notes": {"type": "array", "items": {"type": "string"}},
+    "failure_reason": {"type": ["string", "null"]},
+    "log_artifact": {"type": ["string", "null"]},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code_sha"],
+      "properties": {
+        "code_sha": {"type": "string", "minLength": 1},
+        "scenario_config_sha256": {"type": ["string", "null"], "pattern": "^[a-fA-F0-9]{64}$"},
+        "simulator_version": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

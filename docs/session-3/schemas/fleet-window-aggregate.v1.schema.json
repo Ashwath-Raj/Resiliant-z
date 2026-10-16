@@ -1,0 +1,168 @@
+{
+  "$defs": {
+    "AggregatedMetric": {
+      "additionalProperties": false,
+      "description": "Window result; incomplete data never gets presented as a complete value.",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "aggregation": {
+          "enum": [
+            "sum",
+            "time_weighted_mean"
+          ],
+          "title": "Aggregation",
+          "type": "string"
+        },
+        "quality_flags": {
+          "items": {
+            "enum": [
+              "measured",
+              "missing",
+              "stale",
+              "not_applicable",
+              "not_measured"
+            ],
+            "type": "string"
+          },
+          "title": "Quality Flags",
+          "type": "array"
+        },
+        "measured_duration_s": {
+          "minimum": 0,
+          "title": "Measured Duration S",
+          "type": "number"
+        },
+        "requested_duration_s": {
+          "exclusiveMinimum": 0,
+          "title": "Requested Duration S",
+          "type": "number"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "aggregation",
+        "quality_flags",
+        "measured_duration_s",
+        "requested_duration_s",
+        "coverage_ratio"
+      ],
+      "title": "AggregatedMetric",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Deterministic aggregation summary for one run/scenario and target window.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "backend_id": {
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "window_start": {
+      "format": "date-time",
+      "title": "Window Start",
+      "type": "string"
+    },
+    "window_end": {
+      "format": "date-time",
+      "title": "Window End",
+      "type": "string"
+    },
+    "input_window_count": {
+      "minimum": 0,
+      "title": "Input Window Count",
+      "type": "integer"
+    },
+    "telemetry_coverage_ratio": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Telemetry Coverage Ratio",
+      "type": "number"
+    },
+    "quality_flags": {
+      "items": {
+        "enum": [
+          "measured",
+          "missing",
+          "stale",
+          "not_applicable",
+          "not_measured"
+        ],
+        "type": "string"
+      },
+      "title": "Quality Flags",
+      "type": "array"
+    },
+    "metrics": {
+      "additionalProperties": {
+        "$ref": "#/$defs/AggregatedMetric"
+      },
+      "propertyNames": {
+        "enum": [
+          "active_robots",
+          "idle_robots",
+          "tasks_arrived",
+          "tasks_started",
+          "tasks_completed",
+          "queue_length",
+          "priority_ratio",
+          "junction_occupancy",
+          "junction_pressure"
+        ]
+      },
+      "title": "Metrics",
+      "type": "object"
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario_id",
+    "backend_id",
+    "window_start",
+    "window_end",
+    "input_window_count",
+    "telemetry_coverage_ratio",
+    "quality_flags",
+    "metrics"
+  ],
+  "title": "RESILIANT-Z Fleet Window Aggregate v1.0",
+  "type": "object",
+  "$id": "https://resiliant-z.local/schemas/fleet-window-aggregate.v1.schema.json"
+}

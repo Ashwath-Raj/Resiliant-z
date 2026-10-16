@@ -1,0 +1,135 @@
+{
+  "additionalProperties": false,
+  "description": "One falsifiable, provisional hypothesis; never executable control code.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "hypothesis_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+      "title": "Hypothesis Id",
+      "type": "string"
+    },
+    "gap_event_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Gap Event Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "target_metric": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "falsifiable_claim": {
+      "maxLength": 500,
+      "minLength": 12,
+      "title": "Falsifiable Claim",
+      "type": "string"
+    },
+    "falsification_criterion": {
+      "maxLength": 500,
+      "minLength": 12,
+      "title": "Falsification Criterion",
+      "type": "string"
+    },
+    "focus_variable_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Focus Variable Id",
+      "type": "string"
+    },
+    "predicted_direction": {
+      "enum": [
+        "increase",
+        "decrease",
+        "no_change",
+        "non_monotonic"
+      ],
+      "title": "Predicted Direction",
+      "type": "string"
+    },
+    "predicted_response": {
+      "maxLength": 300,
+      "minLength": 8,
+      "title": "Predicted Response",
+      "type": "string"
+    },
+    "factor_values": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "title": "Factor Values",
+      "type": "object"
+    },
+    "policy_values": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "title": "Policy Values",
+      "type": "object"
+    },
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "rationale": {
+      "maxLength": 1000,
+      "minLength": 12,
+      "title": "Rationale",
+      "type": "string"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "request_id",
+    "hypothesis_id",
+    "gap_event_id",
+    "scenario_id",
+    "target_metric",
+    "falsifiable_claim",
+    "falsification_criterion",
+    "focus_variable_id",
+    "predicted_direction",
+    "predicted_response",
+    "factor_values",
+    "policy_values",
+    "assumptions",
+    "rationale",
+    "confidence"
+  ],
+  "title": "HypothesisProposal",
+  "type": "object"
+}

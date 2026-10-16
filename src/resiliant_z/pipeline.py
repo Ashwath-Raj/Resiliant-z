@@ -161,7 +161,9 @@ def run_demo(
         ],
         "allowed_factors": ["traffic_demand", "priority_ratio", "bypass_ratio"],
     }
-    hypotheses, hypothesis_source, model_id = _select_hypotheses(hypotheses_mode, hypothesis_context)
+    hypotheses, hypothesis_source, model_id = _select_hypotheses(
+        hypotheses_mode, hypothesis_context
+    )
 
     discovery_runs = [
         pilot_run if m.experiment_id == pilot_manifest.experiment_id else simulator.run(m)
@@ -181,7 +183,9 @@ def run_demo(
     policy_throughput = _mean(policy_runs, "throughput_tasks_per_min")
     baseline_wait = _mean(baseline_runs, "average_wait_seconds")
     policy_wait = _mean(policy_runs, "average_wait_seconds")
-    throughput_pct = (policy_throughput - baseline_throughput) / max(baseline_throughput, 1e-9) * 100
+    throughput_pct = (
+        (policy_throughput - baseline_throughput) / max(baseline_throughput, 1e-9) * 100
+    )
     wait_pct = (policy_wait - baseline_wait) / max(baseline_wait, 1e-9) * 100
 
     # The pilot is one of the discovery runs; do not duplicate its provenance row.
@@ -220,15 +224,24 @@ def run_demo(
         "policy_replay": replay_summary,
         "reproducibility": {
             "seeds_per_factorial_cell": seeds_per_cell,
-            "discovery_seed_range": [min(m.seed for m in discovery_manifests), max(m.seed for m in discovery_manifests)],
-            "validation_seed_range": [min(m.seed for m in validation_manifests), max(m.seed for m in validation_manifests)],
+            "discovery_seed_range": [
+                min(m.seed for m in discovery_manifests),
+                max(m.seed for m in discovery_manifests),
+            ],
+            "validation_seed_range": [
+                min(m.seed for m in validation_manifests),
+                max(m.seed for m in validation_manifests),
+            ],
             "policy": "Use bypass_ratio=0.45 when the high-demand/high-priority condition is detected.",
             "policy_is_auto_promoted": False,
         },
     }
 
     _save_json(output / "summary.json", summary)
-    _save_json(output / "hypotheses.json", {"source": hypothesis_source, "model_id": model_id, **hypotheses})
+    _save_json(
+        output / "hypotheses.json",
+        {"source": hypothesis_source, "model_id": model_id, **hypotheses},
+    )
     _save_json(output / "discovery.json", decision.model_dump(mode="json"))
     _save_jsonl(output / "manifests.jsonl", [m.model_dump(mode="json") for m in all_manifests])
     _save_jsonl(output / "runs.jsonl", [r.model_dump(mode="json") for r in all_runs])

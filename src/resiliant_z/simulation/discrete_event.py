@@ -39,13 +39,16 @@ class _Task:
 
 def _git_sha() -> str:
     try:
-        return subprocess.run(
-            ["git", "rev-parse", "--short=12", "HEAD"],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=1,
-        ).stdout.strip() or "uncommitted"
+        return (
+            subprocess.run(
+                ["git", "rev-parse", "--short=12", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=1,
+            ).stdout.strip()
+            or "uncommitted"
+        )
     except (OSError, subprocess.SubprocessError):
         return "uncommitted"
 
@@ -69,7 +72,7 @@ class DiscreteEventFleetSimulator:
       represent special handling/clearance. This is an explicit scenario
       assumption, not a claim about every warehouse or robot fleet.
     - Geometry, collisions, kinematics, sensors, and true deadlocks are not
-      modeled. ``deadlock_events`` therefore remains zero and must not be used
+      modeled. ``deadlock_events`` is therefore unmeasured and must not be used
       as evidence of collision or deadlock safety.
     """
 
@@ -78,6 +81,7 @@ class DiscreteEventFleetSimulator:
     duration_seconds = 900.0
 
     def run(self, manifest: ExperimentManifest) -> SimulationRun:
+        run_started_at = datetime.now(UTC)
         p = manifest.parameters
         rng = random.Random(manifest.seed)
         event_heap: list[tuple[float, int, str, object]] = []
@@ -103,14 +107,10 @@ class DiscreteEventFleetSimulator:
             is_priority = rng.random() < p.priority_ratio
             approach_seconds = rng.uniform(2.0, 4.0)
             junction_service_seconds = (
-                rng.triangular(5.2, 8.0, 6.5)
-                if is_priority
-                else rng.triangular(3.2, 5.8, 4.2)
+                rng.triangular(5.2, 8.0, 6.5) if is_priority else rng.triangular(3.2, 5.8, 4.2)
             )
             bypass_service_seconds = (
-                rng.triangular(3.0, 5.1, 4.0)
-                if is_priority
-                else rng.triangular(1.8, 3.7, 2.7)
+                rng.triangular(3.0, 5.1, 4.0) if is_priority else rng.triangular(1.8, 3.7, 2.7)
             )
             return_seconds = rng.uniform(3.0, 6.0)
             task = _Task(
@@ -173,13 +173,13 @@ class DiscreteEventFleetSimulator:
             route_busy[route] = True
             service_waits[task.task_id] = max(0.0, now - task.arrival_time)
             service_seconds = (
-                task.junction_service_seconds if route == "junction" else task.bypass_service_seconds
+                task.junction_service_seconds
+                if route == "junction"
+                else task.bypass_service_seconds
             )
             if route == "junction":
                 nonlocal junction_busy_seconds
-                junction_busy_seconds += max(
-                    0.0, min(service_seconds, self.duration_seconds - now)
-                )
+                junction_busy_seconds += max(0.0, min(service_seconds, self.duration_seconds - now))
             robot_id = robot_id_for_task[task.task_id]
             schedule(now + service_seconds, "route_done", (route, robot_id, task))
 
@@ -208,9 +208,8 @@ class DiscreteEventFleetSimulator:
                 )
                 if condition_active:
                     conditional_policy_trigger_count += 1
-                use_bypass = (
-                    task.route_uniform < p.bypass_ratio
-                    and (p.routing_policy == "static" or condition_active)
+                use_bypass = task.route_uniform < p.bypass_ratio and (
+                    p.routing_policy == "static" or condition_active
                 )
                 task.route = "bypass" if use_bypass else "junction"
                 if use_bypass:
@@ -291,7 +290,7 @@ class DiscreteEventFleetSimulator:
             average_wait_seconds=round(average_wait, 6),
             queue_growth_per_min=round(queue_growth, 6),
             junction_occupancy=round(min(1.0, junction_busy_seconds / self.duration_seconds), 6),
-            deadlock_events=0,
+            deadlock_events=None,
             task_arrivals=arrivals,
             task_completions=completions,
             route_service_started_count=route_service_started_count,
@@ -308,14 +307,15 @@ class DiscreteEventFleetSimulator:
             experiment=manifest,
             backend="discrete_event",
             metrics=metrics,
-            started_at=datetime.now(UTC),
+            started_at=run_started_at,
+            ended_at=datetime.now(UTC),
             notes=[
                 "CPU-only discrete-event queueing model; not NVIDIA Isaac Sim or a physics-based digital twin.",
                 "Priority tasks receive queue precedence and longer service windows by explicit scenario assumption.",
                 f"Routing policy: {p.routing_policy}; bypass ratio: {p.bypass_ratio:.2f}; assigned bypass tasks: {bypass_task_count}; applied bypass detour: {bypass_detour_total_seconds:.2f}s; conditional triggers: {conditional_policy_trigger_count}.",
                 f"Bypass detour assumption: each bypass route that finishes route service adds {p.bypass_detour_seconds:.2f}s to robot return/availability time; this is a design setting, not measured real-world travel cost.",
                 "Task-level random variates are pre-sampled to improve paired-policy comparability (common random numbers).",
-                "No geometry, collision, sensor, or deadlock model; deadlock_events=0 is not a safety result.",
+                "No geometry, collision, sensor, or deadlock detector; deadlock_events is unmeasured.",
                 "average_wait_seconds is arrival-to-route-service-start wait among tasks whose route service began before the horizon; unfinished waits are excluded.",
                 "tasks_not_started_by_horizon counts right-censored tasks; censored_wait_observation_seconds is a separate horizon-limited descriptive metric, not a completed-wait mean.",
                 f"Simulated duration: {self.duration_seconds:.0f}s; robots: {self.robot_count}; arrivals: {arrivals}; route_service_started: {route_service_started_count}; not_started_by_horizon: {tasks_not_started_by_horizon}; completed: {completions}.",

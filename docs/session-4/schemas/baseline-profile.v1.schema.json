@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resiliant-z.invalid/schemas/baseline-profile.v1.schema.json",
+  "title": "RESILIANT-Z Baseline Profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "baseline_id", "scenario_id", "backend_id", "method", "training_run_ids", "training_window_count", "minimum_samples_per_metric", "metrics", "excluded_metrics"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "baseline_id": {"type": "string", "minLength": 1},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "backend_id": {"type": "string", "minLength": 1},
+    "method": {"const": "per_metric_training_mean"},
+    "training_run_ids": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "training_window_count": {"type": "integer", "minimum": 2},
+    "minimum_samples_per_metric": {"type": "integer", "minimum": 2},
+    "metrics": {"type": "object", "minProperties": 1, "additionalProperties": {"$ref": "#/$defs/metric"}},
+    "excluded_metrics": {"type": "object", "additionalProperties": {"type": "string"}}
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "predicted_mean", "sample_stddev", "sample_count", "distinct_training_runs"],
+      "properties": {
+        "unit": {"type": "string", "minLength": 1},
+        "predicted_mean": {"type": "number"},
+        "sample_stddev": {"type": "number", "minimum": 0},
+        "sample_count": {"type": "integer", "minimum": 2},
+        "distinct_training_runs": {"type": "integer", "minimum": 2}
+      }
+    }
+  }
+}

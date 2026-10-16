@@ -1,0 +1,129 @@
+{
+  "additionalProperties": false,
+  "description": "Trusted limits for semantic compilation; not supplied by the LLM.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "config_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$",
+      "title": "Config Id",
+      "type": "string"
+    },
+    "allowed_scenario_ids": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Allowed Scenario Ids",
+      "type": "array"
+    },
+    "allowed_backends": {
+      "items": {
+        "enum": [
+          "discrete_event",
+          "surrogate"
+        ],
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "title": "Allowed Backends",
+      "type": "array"
+    },
+    "allowed_metrics": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Allowed Metrics",
+      "type": "array"
+    },
+    "parameter_types": {
+      "additionalProperties": {
+        "enum": [
+          "float",
+          "integer"
+        ],
+        "type": "string"
+      },
+      "maxProperties": 100,
+      "minProperties": 1,
+      "title": "Parameter Types",
+      "type": "object"
+    },
+    "supported_interactions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Supported Interactions",
+      "type": "array"
+    },
+    "default_horizon_seconds": {
+      "default": 300.0,
+      "exclusiveMinimum": 0,
+      "maximum": 86400,
+      "title": "Default Horizon Seconds",
+      "type": "number"
+    },
+    "max_horizon_seconds": {
+      "default": 3600.0,
+      "exclusiveMinimum": 0,
+      "maximum": 86400,
+      "title": "Max Horizon Seconds",
+      "type": "number"
+    },
+    "default_replicates_per_arm": {
+      "default": 3,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Default Replicates Per Arm",
+      "type": "integer"
+    },
+    "max_replicates_per_arm": {
+      "default": 12,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Max Replicates Per Arm",
+      "type": "integer"
+    },
+    "max_run_count": {
+      "default": 48,
+      "maximum": 200,
+      "minimum": 2,
+      "title": "Max Run Count",
+      "type": "integer"
+    },
+    "max_hypothesis_bytes": {
+      "default": 32768,
+      "maximum": 262144,
+      "minimum": 512,
+      "title": "Max Hypothesis Bytes",
+      "type": "integer"
+    },
+    "max_manifest_bytes": {
+      "default": 65536,
+      "maximum": 1048576,
+      "minimum": 1024,
+      "title": "Max Manifest Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "config_id",
+    "allowed_scenario_ids",
+    "allowed_backends",
+    "allowed_metrics",
+    "parameter_types"
+  ],
+  "title": "CompilerConfig",
+  "type": "object"
+}

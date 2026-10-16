@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "MetricGapRule": {
+      "additionalProperties": false,
+      "description": "Metric-specific threshold and persistence requirements.\n\n`absolute_residual_threshold` is in the exact unit used by the baseline\nprofile. An optional standardized threshold is an additional OR condition,\nnot a replacement for the unit-aware threshold.",
+      "properties": {
+        "absolute_residual_threshold": {
+          "exclusiveMinimum": 0,
+          "title": "Absolute Residual Threshold",
+          "type": "number"
+        },
+        "standardized_residual_threshold": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standardized Residual Threshold"
+        },
+        "consecutive_breach_windows": {
+          "default": 3,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Consecutive Breach Windows",
+          "type": "integer"
+        },
+        "consecutive_clear_windows": {
+          "default": 2,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Consecutive Clear Windows",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "absolute_residual_threshold"
+      ],
+      "title": "MetricGapRule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "detector_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Detector Id",
+      "type": "string"
+    },
+    "rules": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MetricGapRule"
+      },
+      "minProperties": 1,
+      "title": "Rules",
+      "type": "object"
+    },
+    "history_limit": {
+      "default": 1000,
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "History Limit",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "detector_id",
+    "rules"
+  ],
+  "title": "GapDetectorConfig",
+  "type": "object"
+}

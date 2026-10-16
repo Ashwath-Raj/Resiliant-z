@@ -136,9 +136,7 @@ def policy_comparison_manifests(
             for arm, bypass_ratio, routing_policy in arms:
                 manifests.append(
                     ExperimentManifest(
-                        experiment_id=(
-                            f"REPLAY-{condition_name.upper()}-{arm.upper()}-S{seed}"
-                        ),
+                        experiment_id=(f"REPLAY-{condition_name.upper()}-{arm.upper()}-S{seed}"),
                         scenario_id=condition["scenario_id"],
                         stage="replay",
                         seed=seed,

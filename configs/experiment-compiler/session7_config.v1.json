@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "config_id": "resiliant-z-session7-compiler-v1",
+  "allowed_scenario_ids": [
+    "warehouse-cross-aisles-synthetic-v1"
+  ],
+  "allowed_backends": [
+    "discrete_event",
+    "surrogate"
+  ],
+  "allowed_metrics": [
+    "throughput",
+    "started_task_wait_s",
+    "completion_fraction",
+    "queue_growth",
+    "objective_score",
+    "queue_length",
+    "mean_wait_s"
+  ],
+  "parameter_types": {
+    "traffic_demand": "float",
+    "priority_ratio": "float",
+    "bypass_ratio": "float"
+  },
+  "supported_interactions": [],
+  "default_horizon_seconds": 300.0,
+  "max_horizon_seconds": 3600.0,
+  "default_replicates_per_arm": 3,
+  "max_replicates_per_arm": 12,
+  "max_run_count": 24,
+  "max_manifest_bytes": 65536,
+  "max_hypothesis_bytes": 32768
+}

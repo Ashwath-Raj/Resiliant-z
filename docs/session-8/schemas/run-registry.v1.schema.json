@@ -1,0 +1,204 @@
+{
+  "$defs": {
+    "RunRegistryEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "pattern": "^run-[0-9a-f]{24}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "plan_id": {
+          "pattern": "^plan-[0-9a-f]{24}$",
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "manifest_id": {
+          "title": "Manifest Id",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "discovery",
+            "selection",
+            "validation",
+            "replay"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "arm_id": {
+          "enum": [
+            "control",
+            "treatment"
+          ],
+          "title": "Arm Id",
+          "type": "string"
+        },
+        "replicate_index": {
+          "maximum": 99,
+          "minimum": 0,
+          "title": "Replicate Index",
+          "type": "integer"
+        },
+        "seed": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "planned",
+            "validated",
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "timed_out",
+            "incomplete",
+            "invalidated"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "updated_at_utc": {
+          "format": "date-time",
+          "title": "Updated At Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "plan_id",
+        "manifest_id",
+        "split",
+        "arm_id",
+        "replicate_index",
+        "seed",
+        "status",
+        "updated_at_utc"
+      ],
+      "title": "RunRegistryEntry",
+      "type": "object"
+    },
+    "RunStateEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "pattern": "^evt-[0-9a-f]{24}$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "pattern": "^run-[0-9a-f]{24}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "from_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "planned",
+                "validated",
+                "queued",
+                "running",
+                "succeeded",
+                "failed",
+                "timed_out",
+                "incomplete",
+                "invalidated"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Status"
+        },
+        "to_status": {
+          "enum": [
+            "planned",
+            "validated",
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "timed_out",
+            "incomplete",
+            "invalidated"
+          ],
+          "title": "To Status",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "occurred_at_utc": {
+          "format": "date-time",
+          "title": "Occurred At Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "to_status",
+        "reason",
+        "occurred_at_utc"
+      ],
+      "title": "RunStateEvent",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "registry_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Registry Version",
+      "type": "integer"
+    },
+    "runs": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RunRegistryEntry"
+      },
+      "title": "Runs",
+      "type": "object"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/RunStateEvent"
+      },
+      "maxItems": 100000,
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "title": "RunRegistrySnapshot",
+  "type": "object"
+}

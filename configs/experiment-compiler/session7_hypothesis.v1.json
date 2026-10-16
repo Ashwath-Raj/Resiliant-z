@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "session7-offline-example-01",
+  "hypothesis_id": "HYP-TRAFFIC-QUEUE-SESSION7",
+  "gap_event_id": "GAP-SYNTHETIC-001",
+  "scenario_id": "warehouse-cross-aisles-synthetic-v1",
+  "target_metric": "queue_growth",
+  "falsifiable_claim": "For the registered synthetic warehouse scenario, raising traffic_demand from its nearest registered lower level increases queue_growth under fixed remaining controls.",
+  "falsification_criterion": "Reject if paired runs do not show a positive queue_growth change beyond the preregistered tolerance.",
+  "focus_variable_id": "traffic_demand",
+  "predicted_direction": "increase",
+  "predicted_response": "queue_growth is predicted to increase at the higher registered traffic-demand level.",
+  "factor_values": {
+    "traffic_demand": 1.05,
+    "priority_ratio": 0.15
+  },
+  "policy_values": {
+    "bypass_ratio": 0.0
+  },
+  "assumptions": [
+    "The scenario registry is the authority for permitted experiment values.",
+    "All parameters are synthetic and uncalibrated; effects require measured runs."
+  ],
+  "rationale": "Higher registered task demand may increase queue pressure in the local discrete-event model; this is a provisional testable claim, not an established causal result.",
+  "confidence": 0.35
+}

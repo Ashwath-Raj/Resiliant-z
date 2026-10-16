@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "config_id": "session9-offline-default",
+  "max_runs_per_invocation": 24,
+  "allowed_executor_kinds": ["local"],
+  "allow_execution": false,
+  "allow_remote_execution": false,
+  "journal_max_bytes": 16777216
+}

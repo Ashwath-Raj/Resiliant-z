@@ -47,11 +47,16 @@ def test_local_fleet_demo_compares_three_policies_in_two_conditions(tmp_path):
     for condition in replay["conditions"].values():
         assert set(condition["policies"]) == {"baseline", "static", "conditioned"}
         assert set(condition["paired_comparisons"]) == {
-            "static_vs_baseline", "conditioned_vs_baseline", "conditioned_vs_static"
+            "static_vs_baseline",
+            "conditioned_vs_baseline",
+            "conditioned_vs_static",
         }
-        assert condition["paired_comparisons"]["conditioned_vs_baseline"][
-            "throughput_tasks_per_min"
-        ]["paired_seed_count"] == 3
+        assert (
+            condition["paired_comparisons"]["conditioned_vs_baseline"]["throughput_tasks_per_min"][
+                "paired_seed_count"
+            ]
+            == 3
+        )
 
     manifests = [
         json.loads(line)
@@ -61,14 +66,21 @@ def test_local_fleet_demo_compares_three_policies_in_two_conditions(tmp_path):
     replay_seeds = {m["seed"] for m in manifests if m["stage"] == "replay"}
     assert selection_seeds.isdisjoint(replay_seeds)
     for scenario in {m["scenario_id"] for m in manifests if m["stage"] == "replay"}:
-        scenario_runs = [m for m in manifests if m["stage"] == "replay" and m["scenario_id"] == scenario]
+        scenario_runs = [
+            m for m in manifests if m["stage"] == "replay" and m["scenario_id"] == scenario
+        ]
         for seed in replay_seeds:
             pair = [m for m in scenario_runs if m["seed"] == seed]
             assert len(pair) == 3
             assert {m["experiment_id"].split("-")[2].lower() for m in pair} == {
-                "baseline", "static", "conditioned"
+                "baseline",
+                "static",
+                "conditioned",
             }
-            ratios = {m["experiment_id"].split("-")[2].lower(): m["parameters"]["bypass_ratio"] for m in pair}
+            ratios = {
+                m["experiment_id"].split("-")[2].lower(): m["parameters"]["bypass_ratio"]
+                for m in pair
+            }
             assert ratios["baseline"] == 0.0
             assert ratios["static"] == selected_ratio
             assert ratios["conditioned"] == selected_ratio

@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "manifest_id": "exp-0123456789abcdef01234567",
+  "compiler_version": "session7.semantic-compiler.v1",
+  "status": "compiled_provisional",
+  "hypothesis_id": "HYP-TRAFFIC-001",
+  "hypothesis_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "scenario_id": "warehouse-synthetic-v1",
+  "scenario_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "compiler_config_id": "session7-compiler-v1",
+  "compiler_config_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "evidence_label": "LOCAL DISCRETE-EVENT FLEET MODEL — NOT ISAAC SIM",
+  "backend_id": "discrete_event",
+  "target_metric": "mean_wait_seconds",
+  "predicted_direction": "increase",
+  "design_kind": "paired_single_factor",
+  "registry": [
+    {
+      "kind": "scenario_factor",
+      "parameter_id": "traffic_demand",
+      "value_type": "float",
+      "unit": "normalized demand",
+      "min_value": 0.1,
+      "max_value": 2.0,
+      "registered_values": [0.55, 1.05]
+    },
+    {
+      "kind": "scenario_factor",
+      "parameter_id": "priority_ratio",
+      "value_type": "float",
+      "unit": "ratio",
+      "min_value": 0.0,
+      "max_value": 1.0,
+      "registered_values": [0.25, 0.5]
+    },
+    {
+      "kind": "policy_parameter",
+      "parameter_id": "bypass_ratio",
+      "value_type": "float",
+      "unit": "ratio",
+      "min_value": 0.0,
+      "max_value": 0.5,
+      "registered_values": [0.0, 0.15],
+      "default_value": 0.0
+    }
+  ],
+  "focus": {
+    "parameter_id": "traffic_demand",
+    "kind": "scenario_factor",
+    "unit": "normalized demand",
+    "value_type": "float",
+    "control_value": 0.55,
+    "treatment_value": 1.05,
+    "comparison_rule": "nearest_distinct_registered_level"
+  },
+  "control": {
+    "arm_id": "control",
+    "scenario_factors": {"traffic_demand": 0.55, "priority_ratio": 0.25},
+    "policy_parameters": {"bypass_ratio": 0.0}
+  },
+  "treatment": {
+    "arm_id": "treatment",
+    "scenario_factors": {"traffic_demand": 1.05, "priority_ratio": 0.25},
+    "policy_parameters": {"bypass_ratio": 0.0}
+  },
+  "interaction_terms": [],
+  "horizon_seconds": 300.0,
+  "replicates_per_arm": 3,
+  "run_count": 6,
+  "max_run_count_at_compile": 48,
+  "seed_allocation": "deferred_to_session_8_planner",
+  "automatic_execution": false,
+  "promotion_status": "provisional_not_validated",
+  "notice": "Compilation creates a specification only; it does not execute a backend or establish causality."
+}

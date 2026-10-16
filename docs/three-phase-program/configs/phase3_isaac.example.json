@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "backend": "isaac_sim_import",
+  "target_release": "TBD_AFTER_HOST_VERIFICATION",
+  "execution_enabled": false,
+  "install_or_download_enabled": false,
+  "asset_download_enabled": false,
+  "cloud_jobs_enabled": false,
+  "ros2_enabled": false,
+  "scenario": {
+    "scenario_id": "warehouse_priority_junction_v1",
+    "robot_asset_id": "TBD_APPROVED_LOCAL_OR_OFFICIAL_ASSET",
+    "initial_robot_count": 1,
+    "staged_robot_counts": [1, 2, 10, 20, 35],
+    "junctions": "defined_by_versioned_scene_config",
+    "task_zones": "pickup_drop_priority_charging"
+  },
+  "control": {
+    "decision_source": "canonical_resiliant_policy_function",
+    "articulation_controller_required": true,
+    "direct_transform_animation_allowed": false
+  },
+  "evidence": {
+    "require_code_sha": true,
+    "require_scene_and_asset_hashes": true,
+    "require_commanded_and_observed_pose": true,
+    "require_task_lifecycle_events": true,
+    "require_contact_instrumentation_before_reporting_collision_metrics": true,
+    "unmeasured_metrics_must_be_null": true
+  }
+}

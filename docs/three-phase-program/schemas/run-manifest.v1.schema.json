@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resiliant-z.local/schemas/run-manifest.v1.schema.json",
+  "title": "RESILIANT Experiment Manifest v1 (target contract)",
+  "description": "Versioned experiment input contract; optional scenario metadata preserves compatibility with legacy manifests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "experiment_id", "scenario_id", "scenario_version", "scenario_config_sha256", "stage", "seed", "parameters", "git_sha"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "experiment_id": {"type": "string", "minLength": 3, "maxLength": 80, "pattern": "^[A-Za-z0-9_.-]+$"},
+    "scenario_id": {"type": "string", "minLength": 3, "maxLength": 80},
+    "scenario_version": {"type": ["string", "null"], "minLength": 1, "maxLength": 80},
+    "scenario_config_sha256": {"type": ["string", "null"], "pattern": "^[a-fA-F0-9]{64}$"},
+    "stage": {"enum": ["discovery", "validation", "policy_selection", "replay"]},
+    "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "git_sha": {"type": "string", "minLength": 1},
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["traffic_demand", "priority_ratio", "bypass_ratio"],
+      "properties": {
+        "traffic_demand": {"type": "number", "minimum": 0.4, "maximum": 1.2},
+        "priority_ratio": {"type": "number", "minimum": 0.1, "maximum": 0.6},
+        "bypass_ratio": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "bypass_detour_seconds": {"type": "number", "minimum": 0, "maximum": 30},
+        "routing_policy": {"enum": ["static", "conditioned"]}
+      }
+    }
+  }
+}

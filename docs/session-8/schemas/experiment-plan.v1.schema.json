@@ -1,0 +1,332 @@
+{
+  "$defs": {
+    "PlannedRun": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "pattern": "^run-[0-9a-f]{24}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "plan_id": {
+          "pattern": "^plan-[0-9a-f]{24}$",
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "manifest_id": {
+          "title": "Manifest Id",
+          "type": "string"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Manifest Sha256",
+          "type": "string"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "scenario_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Scenario Sha256",
+          "type": "string"
+        },
+        "backend_id": {
+          "enum": [
+            "discrete_event",
+            "surrogate"
+          ],
+          "title": "Backend Id",
+          "type": "string"
+        },
+        "target_metric": {
+          "title": "Target Metric",
+          "type": "string"
+        },
+        "horizon_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Horizon Seconds",
+          "type": "number"
+        },
+        "split": {
+          "enum": [
+            "discovery",
+            "selection",
+            "validation",
+            "replay"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "arm_id": {
+          "enum": [
+            "control",
+            "treatment"
+          ],
+          "title": "Arm Id",
+          "type": "string"
+        },
+        "replicate_index": {
+          "maximum": 99,
+          "minimum": 0,
+          "title": "Replicate Index",
+          "type": "integer"
+        },
+        "seed": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "scenario_factors": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "maxProperties": 100,
+          "minProperties": 1,
+          "title": "Scenario Factors",
+          "type": "object"
+        },
+        "policy_parameters": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "maxProperties": 100,
+          "minProperties": 1,
+          "title": "Policy Parameters",
+          "type": "object"
+        },
+        "selection_strategy": {
+          "const": "predeclared_paired_single_factor",
+          "title": "Selection Strategy",
+          "type": "string"
+        },
+        "selection_reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Selection Reason",
+          "type": "string"
+        },
+        "status": {
+          "const": "planned",
+          "default": "planned",
+          "title": "Status",
+          "type": "string"
+        },
+        "automatic_execution": {
+          "const": false,
+          "default": false,
+          "title": "Automatic Execution",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "run_id",
+        "plan_id",
+        "manifest_id",
+        "source_manifest_sha256",
+        "scenario_id",
+        "scenario_sha256",
+        "backend_id",
+        "target_metric",
+        "horizon_seconds",
+        "split",
+        "arm_id",
+        "replicate_index",
+        "seed",
+        "scenario_factors",
+        "policy_parameters",
+        "selection_strategy",
+        "selection_reason"
+      ],
+      "title": "PlannedRun",
+      "type": "object"
+    },
+    "SeedAllocation": {
+      "additionalProperties": false,
+      "properties": {
+        "split": {
+          "enum": [
+            "discovery",
+            "selection",
+            "validation",
+            "replay"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "seeds": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Seeds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "split",
+        "seeds"
+      ],
+      "title": "SeedAllocation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^plan-[0-9a-f]{24}$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "planner_version": {
+      "const": "session8.experiment-planner.v1",
+      "default": "session8.experiment-planner.v1",
+      "title": "Planner Version",
+      "type": "string"
+    },
+    "status": {
+      "const": "planned",
+      "default": "planned",
+      "title": "Status",
+      "type": "string"
+    },
+    "source_manifest_id": {
+      "title": "Source Manifest Id",
+      "type": "string"
+    },
+    "source_manifest_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Manifest Sha256",
+      "type": "string"
+    },
+    "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "scenario_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Scenario Sha256",
+      "type": "string"
+    },
+    "backend_id": {
+      "enum": [
+        "discrete_event",
+        "surrogate"
+      ],
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "target_metric": {
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "root_seed": {
+      "maximum": 4294967295,
+      "minimum": 0,
+      "title": "Root Seed",
+      "type": "integer"
+    },
+    "planner_config_id": {
+      "title": "Planner Config Id",
+      "type": "string"
+    },
+    "planner_config_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Planner Config Sha256",
+      "type": "string"
+    },
+    "seed_derivation_version": {
+      "const": "sha256-v1",
+      "title": "Seed Derivation Version",
+      "type": "string"
+    },
+    "seed_allocations": {
+      "items": {
+        "$ref": "#/$defs/SeedAllocation"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "title": "Seed Allocations",
+      "type": "array"
+    },
+    "selection_strategy": {
+      "const": "predeclared_paired_single_factor",
+      "title": "Selection Strategy",
+      "type": "string"
+    },
+    "selection_reason": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Selection Reason",
+      "type": "string"
+    },
+    "common_random_numbers": {
+      "const": true,
+      "default": true,
+      "title": "Common Random Numbers",
+      "type": "boolean"
+    },
+    "run_count": {
+      "maximum": 200,
+      "minimum": 8,
+      "title": "Run Count",
+      "type": "integer"
+    },
+    "max_run_count_at_compile": {
+      "maximum": 200,
+      "minimum": 2,
+      "title": "Max Run Count At Compile",
+      "type": "integer"
+    },
+    "automatic_execution": {
+      "const": false,
+      "default": false,
+      "title": "Automatic Execution",
+      "type": "boolean"
+    },
+    "evidence_status": {
+      "const": "not_executed_not_evidence",
+      "default": "not_executed_not_evidence",
+      "title": "Evidence Status",
+      "type": "string"
+    },
+    "runs": {
+      "items": {
+        "$ref": "#/$defs/PlannedRun"
+      },
+      "maxItems": 200,
+      "minItems": 8,
+      "title": "Runs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "plan_id",
+    "source_manifest_id",
+    "source_manifest_sha256",
+    "scenario_id",
+    "scenario_sha256",
+    "backend_id",
+    "target_metric",
+    "root_seed",
+    "planner_config_id",
+    "planner_config_sha256",
+    "seed_derivation_version",
+    "seed_allocations",
+    "selection_strategy",
+    "selection_reason",
+    "run_count",
+    "max_run_count_at_compile",
+    "runs"
+  ],
+  "title": "ExperimentPlan",
+  "type": "object"
+}

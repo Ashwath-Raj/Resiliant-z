@@ -188,7 +188,8 @@ def run_detour_sensitivity(
     for run in runs:
         cost = float(run.experiment.parameters.bypass_detour_seconds)
         condition_name = next(
-            name for name, condition in REPLAY_CONDITIONS.items()
+            name
+            for name, condition in REPLAY_CONDITIONS.items()
             if condition["scenario_id"] == run.experiment.scenario_id
         )
         arm = _arm_from_run(run)
@@ -227,9 +228,7 @@ def run_detour_sensitivity(
                 for arm in POLICY_ARMS
             }
             cost_effects_vs_zero = {
-                arm: _paired_delta(
-                    zero_by_arm[arm], by_arm[arm], "policy_objective_score"
-                )
+                arm: _paired_delta(zero_by_arm[arm], by_arm[arm], "policy_objective_score")
                 for arm in POLICY_ARMS
             }
             cost_results[_level_key(cost)] = {
@@ -284,7 +283,9 @@ def run_detour_sensitivity(
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
     _write_json(output / "summary.json", summary)
-    _write_jsonl(output / "manifests.jsonl", [manifest.model_dump(mode="json") for manifest in manifests])
+    _write_jsonl(
+        output / "manifests.jsonl", [manifest.model_dump(mode="json") for manifest in manifests]
+    )
     _write_jsonl(output / "runs.jsonl", [run.model_dump(mode="json") for run in runs])
     _write_csv(output / "sensitivity.csv", csv_rows)
     (output / "report.md").write_text(_build_report(summary), encoding="utf-8")
@@ -306,14 +307,16 @@ def _build_report(summary: dict) -> str:
         "",
     ]
     for condition_name, condition in summary["conditions"].items():
-        lines.extend([
-            f"## {condition_name.replace('_', ' ').title()} condition",
-            "",
-            f"Scenario `{condition['scenario_id']}`; traffic demand `{condition['traffic_demand']}`; priority ratio `{condition['priority_ratio']}`.",
-            "",
-            "| Detour (s) | Baseline score | Static score | Conditioned score | Conditioned − static score (95% CI) | Static bypass tasks | Conditioned bypass tasks |",
-            "|---:|---:|---:|---:|---:|---:|---:|",
-        ])
+        lines.extend(
+            [
+                f"## {condition_name.replace('_', ' ').title()} condition",
+                "",
+                f"Scenario `{condition['scenario_id']}`; traffic demand `{condition['traffic_demand']}`; priority ratio `{condition['priority_ratio']}`.",
+                "",
+                "| Detour (s) | Baseline score | Static score | Conditioned score | Conditioned − static score (95% CI) | Static bypass tasks | Conditioned bypass tasks |",
+                "|---:|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
         for _, level in condition["detour_levels"].items():
             policies = level["policies"]
             delta = level["paired_comparisons"]["conditioned_vs_static"]["policy_objective_score"]
@@ -348,14 +351,16 @@ def _build_report(summary: dict) -> str:
                 )
         lines.append("")
 
-    lines.extend([
-        "## Interpretation guardrails",
-        "",
-        "- These are deterministic, paired runs of the CPU-only discrete-event model; they are not Isaac Sim or physical-robot results.",
-        "- The 2.5-second default is a design assumption, not a calibrated travel-time measurement.",
-        "- The fixed bypass ratio prevents cost-specific re-tuning from being conflated with sensitivity to the detour assumption.",
-        "- Confidence intervals are unadjusted exploratory 95% Student-t intervals across multiple metrics and cost levels; treat borderline results cautiously.",
-        "- Review `sensitivity.csv` for the long-form table, `summary.json` for paired comparisons, and the JSONL files for run-level provenance.",
-        "",
-    ])
+    lines.extend(
+        [
+            "## Interpretation guardrails",
+            "",
+            "- These are deterministic, paired runs of the CPU-only discrete-event model; they are not Isaac Sim or physical-robot results.",
+            "- The 2.5-second default is a design assumption, not a calibrated travel-time measurement.",
+            "- The fixed bypass ratio prevents cost-specific re-tuning from being conflated with sensitivity to the detour assumption.",
+            "- Confidence intervals are unadjusted exploratory 95% Student-t intervals across multiple metrics and cost levels; treat borderline results cautiously.",
+            "- Review `sensitivity.csv` for the long-form table, `summary.json` for paired comparisons, and the JSONL files for run-level provenance.",
+            "",
+        ]
+    )
     return "\n".join(lines)

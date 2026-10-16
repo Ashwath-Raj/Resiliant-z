@@ -59,15 +59,11 @@ def _policy_objective_components(run: SimulationRun) -> dict[str, float]:
     not_started_fraction = min(1.0, not_started / arrivals) if arrivals else 0.0
     normalized_started_wait = min(1.0, metrics.average_wait_seconds / WAIT_NORMALIZATION_SECONDS)
     arrival_rate_per_minute = 12.0 * parameters.traffic_demand
-    normalized_queue_growth = min(
-        1.0, metrics.queue_growth_per_min / arrival_rate_per_minute
-    )
+    normalized_queue_growth = min(1.0, metrics.queue_growth_per_min / arrival_rate_per_minute)
     available_robot_seconds = (
         DiscreteEventFleetSimulator.robot_count * DiscreteEventFleetSimulator.duration_seconds
     )
-    bypass_detour_capacity_fraction = min(
-        1.0, bypass_detour_seconds / available_robot_seconds
-    )
+    bypass_detour_capacity_fraction = min(1.0, bypass_detour_seconds / available_robot_seconds)
     bypass_intervention_fraction = min(1.0, bypass_tasks / arrivals) if arrivals else 0.0
 
     return {
@@ -83,10 +79,7 @@ def _policy_objective_components(run: SimulationRun) -> dict[str, float]:
 def _policy_objective_score(run: SimulationRun) -> float:
     """Weighted normalized penalty; lower is better, with fixed published weights."""
     components = _policy_objective_components(run)
-    return sum(
-        weight * components[name]
-        for name, weight in POLICY_OBJECTIVE_WEIGHTS.items()
-    )
+    return sum(weight * components[name] for name, weight in POLICY_OBJECTIVE_WEIGHTS.items())
 
 
 def _task_counts(runs: list[SimulationRun]) -> dict[str, float | int]:
@@ -107,12 +100,35 @@ def _task_counts(runs: list[SimulationRun]) -> dict[str, float | int]:
 def _t_critical_975(degrees_of_freedom: int) -> float:
     """Two-sided 95% Student-t critical values for small paired samples."""
     table = {
-        1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571,
-        6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228,
-        11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145, 15: 2.131,
-        16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086,
-        21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060,
-        26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045,
+        1: 12.706,
+        2: 4.303,
+        3: 3.182,
+        4: 2.776,
+        5: 2.571,
+        6: 2.447,
+        7: 2.365,
+        8: 2.306,
+        9: 2.262,
+        10: 2.228,
+        11: 2.201,
+        12: 2.179,
+        13: 2.160,
+        14: 2.145,
+        15: 2.131,
+        16: 2.120,
+        17: 2.110,
+        18: 2.101,
+        19: 2.093,
+        20: 2.086,
+        21: 2.080,
+        22: 2.074,
+        23: 2.069,
+        24: 2.064,
+        25: 2.060,
+        26: 2.056,
+        27: 2.052,
+        28: 2.048,
+        29: 2.045,
     }
     return table.get(degrees_of_freedom, 1.96 if degrees_of_freedom >= 30 else 12.706)
 
@@ -137,8 +153,7 @@ def _paired_delta(
         return float(getattr(run.metrics, metric))
 
     differences = [
-        value(treatment_by_seed[seed]) - value(baseline_by_seed[seed])
-        for seed in common_seeds
+        value(treatment_by_seed[seed]) - value(baseline_by_seed[seed]) for seed in common_seeds
     ]
     mean_delta = statistics.fmean(differences)
     sample_variance = sum((item - mean_delta) ** 2 for item in differences) / (len(differences) - 1)
@@ -162,9 +177,7 @@ def _arm_summary(runs: list[SimulationRun]) -> dict:
         "mean_started_task_wait_seconds": round(started_wait, 6),
         "started_task_wait_sample_count": started_wait_samples,
         "mean_queue_growth_per_min": round(_mean(runs, "queue_growth_per_min"), 6),
-        "mean_bypass_detour_total_seconds": round(
-            _mean(runs, "bypass_detour_total_seconds"), 6
-        ),
+        "mean_bypass_detour_total_seconds": round(_mean(runs, "bypass_detour_total_seconds"), 6),
         "mean_policy_objective_score": round(
             statistics.fmean(_policy_objective_score(run) for run in runs) if runs else 0.0,
             6,
@@ -204,7 +217,9 @@ def _summarize_policy_comparison(
     """Summarize three policies under nominal and high-risk operating conditions."""
     result: dict[str, dict] = {}
     for condition_name, condition in REPLAY_CONDITIONS.items():
-        condition_runs = [run for run in runs if run.experiment.scenario_id == condition["scenario_id"]]
+        condition_runs = [
+            run for run in runs if run.experiment.scenario_id == condition["scenario_id"]
+        ]
         by_arm: dict[str, list[SimulationRun]] = {"baseline": [], "static": [], "conditioned": []}
         for run in condition_runs:
             parts = run.experiment.experiment_id.split("-")
@@ -248,10 +263,12 @@ def _summarize_policy_comparison(
             "paired_comparisons": comparisons,
             "conditioned_activation": {
                 "eligible_high_risk_arrivals": sum(
-                    run.metrics.high_risk_context_arrival_count or 0 for run in by_arm["conditioned"]
+                    run.metrics.high_risk_context_arrival_count or 0
+                    for run in by_arm["conditioned"]
                 ),
                 "junction_pressure_triggers": sum(
-                    run.metrics.conditional_policy_trigger_count or 0 for run in by_arm["conditioned"]
+                    run.metrics.conditional_policy_trigger_count or 0
+                    for run in by_arm["conditioned"]
                 ),
                 "actual_bypass_tasks": sum(
                     run.metrics.bypass_task_count or 0 for run in by_arm["conditioned"]
@@ -323,8 +340,9 @@ def _select_bypass_ratio(runs: list[SimulationRun]) -> tuple[float, list[dict]]:
                 ),
                 "mean_policy_objective_components": {
                     name: round(
-                        statistics.fmean(_policy_objective_components(run)[name]
-                                         for run in candidate_runs),
+                        statistics.fmean(
+                            _policy_objective_components(run)[name] for run in candidate_runs
+                        ),
                         6,
                     )
                     for name in POLICY_OBJECTIVE_WEIGHTS
@@ -427,9 +445,7 @@ def run_fleet_demo(
     )
     hypotheses = local_hypotheses().model_dump(mode="json")
     all_runs = [*discovery_runs, *validation_runs, *selection_runs, *replay_runs]
-    all_manifests = [
-        *discovery_manifests, *validation_manifests, *selection_manifests, *manifests
-    ]
+    all_manifests = [*discovery_manifests, *validation_manifests, *selection_manifests, *manifests]
     summary = {
         "project": "RESILIANT-Z",
         "created_at": datetime.now(UTC).isoformat(),
@@ -461,11 +477,13 @@ def run_fleet_demo(
             "policy_thresholds": "predeclared midpoints between factorial design levels, not discovered thresholds",
             "paired_randomness": "per-task random variates are pre-sampled for policy comparisons",
             "geometry_and_collisions": "not modelled",
-            "deadlocks": "not modelled; reported zero is not a safety result",
+            "deadlocks": "not modelled or measured; the metric is null",
         },
     }
     _write_json(output / "summary.json", summary)
-    _write_json(output / "hypotheses.json", {"source": "local_baseline", "model_id": "none", **hypotheses})
+    _write_json(
+        output / "hypotheses.json", {"source": "local_baseline", "model_id": "none", **hypotheses}
+    )
     _write_json(output / "discovery.json", decision.model_dump(mode="json"))
     _write_jsonl(output / "manifests.jsonl", [m.model_dump(mode="json") for m in all_manifests])
     _write_jsonl(output / "runs.jsonl", [r.model_dump(mode="json") for r in all_runs])
@@ -530,12 +548,14 @@ def run_fleet_demo(
         "",
     ]
     for condition_name, condition_result in replay_summary["conditions"].items():
-        lines.extend([
-            f"### {condition_name.replace('_', ' ').title()} condition",
-            "",
-            f"- Workload: traffic demand `{condition_result['traffic_demand']}`, priority ratio `{condition_result['priority_ratio']}`.",
-            "- Policy metrics (means across paired seeds):",
-        ])
+        lines.extend(
+            [
+                f"### {condition_name.replace('_', ' ').title()} condition",
+                "",
+                f"- Workload: traffic demand `{condition_result['traffic_demand']}`, priority ratio `{condition_result['priority_ratio']}`.",
+                "- Policy metrics (means across paired seeds):",
+            ]
+        )
         for arm_name, arm_result in condition_result["policies"].items():
             task_counts = arm_result["task_counts"]
             lines.append(
@@ -559,19 +579,23 @@ def run_fleet_demo(
                     f"95% CI `[{stats['ci95_low']:.4f}, {stats['ci95_high']:.4f}]` (n={stats['paired_seed_count']})."
                 )
         activation = condition_result["conditioned_activation"]
-        lines.extend([
-            f"- Conditioned policy counters: `{activation['eligible_high_risk_arrivals']}` high-risk-envelope arrivals, "
-            f"`{activation['junction_pressure_triggers']}` pressure triggers, "
-            f"`{activation['actual_bypass_tasks']}` actual bypass tasks.",
+        lines.extend(
+            [
+                f"- Conditioned policy counters: `{activation['eligible_high_risk_arrivals']}` high-risk-envelope arrivals, "
+                f"`{activation['junction_pressure_triggers']}` pressure triggers, "
+                f"`{activation['actual_bypass_tasks']}` actual bypass tasks.",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "## Explicit limitations",
             "",
-        ])
-    lines.extend([
-        "## Explicit limitations",
-        "",
-        *[f"- {item}" for item in decision.limitations],
-        "- The queueing model contains explicit scenario assumptions; outcomes cannot be generalized to physical robots without Isaac Sim validation.",
-        "- Policy-condition thresholds are predeclared design midpoints, not learned thresholds.",
-        "- This benchmark does not call Token Factory and does not require a GPU.",
-    ])
+            *[f"- {item}" for item in decision.limitations],
+            "- The queueing model contains explicit scenario assumptions; outcomes cannot be generalized to physical robots without Isaac Sim validation.",
+            "- Policy-condition thresholds are predeclared design midpoints, not learned thresholds.",
+            "- This benchmark does not call Token Factory and does not require a GPU.",
+        ]
+    )
     (output / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return summary

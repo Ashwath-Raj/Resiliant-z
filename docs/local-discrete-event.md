@@ -16,7 +16,7 @@
 - Each bypass route that completes route service adds `bypass_detour_seconds` to the robot's return/availability time (default `2.5` simulated seconds; allowed range `0–30`). This represents an explicit detour cost. The default is a scenario-design value, not a measured or calibrated travel cost. The reported cumulative cost counts applied detour seconds in route completions observed within the horizon.
 - Priority tasks are scheduled ahead of normal tasks and have longer service windows. This is an explicit scenario assumption intended to expose workload/capacity interactions, not a universal physical fact.
 - Random events derive from the experiment manifest's seed. Metrics should be deterministic for the same code, manifest and Python runtime.
-- Geometry, collisions, kinematics, sensors, battery, blocked paths and true deadlocks are not modeled. `deadlock_events=0` is structurally imposed, not a safety metric.
+- Geometry, collisions, kinematics, sensors, battery, blocked paths and true deadlocks are not modeled. `deadlock_events` is null/unmeasured, not a safety metric.
 
 ## Run it
 

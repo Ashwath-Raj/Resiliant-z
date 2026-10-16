@@ -35,7 +35,9 @@ def _fit(runs: Sequence[SimulationRun], include_interaction: bool) -> np.ndarray
     return coefficients
 
 
-def _rmse(runs: Sequence[SimulationRun], coefficients: np.ndarray, include_interaction: bool) -> float:
+def _rmse(
+    runs: Sequence[SimulationRun], coefficients: np.ndarray, include_interaction: bool
+) -> float:
     residuals = _targets(runs) - _design(runs, include_interaction) @ coefficients
     return float(np.sqrt(np.mean(np.square(residuals))))
 
@@ -43,12 +45,35 @@ def _rmse(runs: Sequence[SimulationRun], coefficients: np.ndarray, include_inter
 def _t_critical_975(df: int) -> float:
     """Conservative two-sided 95% t critical value for small cell counts."""
     table = {
-        1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571,
-        6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228,
-        11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145, 15: 2.131,
-        16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086,
-        21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060,
-        26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045,
+        1: 12.706,
+        2: 4.303,
+        3: 3.182,
+        4: 2.776,
+        5: 2.571,
+        6: 2.447,
+        7: 2.365,
+        8: 2.306,
+        9: 2.262,
+        10: 2.228,
+        11: 2.201,
+        12: 2.179,
+        13: 2.160,
+        14: 2.145,
+        15: 2.131,
+        16: 2.120,
+        17: 2.110,
+        18: 2.101,
+        19: 2.093,
+        20: 2.086,
+        21: 2.080,
+        22: 2.074,
+        23: 2.069,
+        24: 2.064,
+        25: 2.060,
+        26: 2.056,
+        27: 2.052,
+        28: 2.048,
+        29: 2.045,
     }
     return table.get(df, 1.96 if df >= 30 else 12.706)
 
@@ -63,7 +88,10 @@ def _validation_interaction_contrast(
     is used. At least two samples per factorial cell are required.
     """
     cells: dict[tuple[bool, bool], list[float]] = {
-        (False, False): [], (False, True): [], (True, False): [], (True, True): []
+        (False, False): [],
+        (False, True): [],
+        (True, False): [],
+        (True, True): [],
     }
     for run in runs:
         key = (
@@ -76,11 +104,10 @@ def _validation_interaction_contrast(
 
     means = {key: float(np.mean(values)) for key, values in cells.items()}
     # Contrast signs: LL +1, LH -1, HL -1, HH +1.
-    effect = means[(True, True)] - means[(True, False)] - means[(False, True)] + means[(False, False)]
-    variances = {
-        key: float(np.var(values, ddof=1)) / len(values)
-        for key, values in cells.items()
-    }
+    effect = (
+        means[(True, True)] - means[(True, False)] - means[(False, True)] + means[(False, False)]
+    )
+    variances = {key: float(np.var(values, ddof=1)) / len(values) for key, values in cells.items()}
     standard_error = float(np.sqrt(sum(variances.values())))
     min_df = min(len(values) - 1 for values in cells.values())
     margin = _t_critical_975(min_df) * standard_error

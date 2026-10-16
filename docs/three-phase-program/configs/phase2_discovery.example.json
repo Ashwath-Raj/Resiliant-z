@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "provider": {
+    "default": "fixture",
+    "allow_remote_provider": false,
+    "max_retries": 2,
+    "max_hypotheses": 5
+  },
+  "experiment_compiler": {
+    "allow_unknown_factors": false,
+    "allow_executable_code": false,
+    "require_parameter_range_validation": true,
+    "require_scenario_allowlist": true
+  },
+  "orchestration": {
+    "default_backend": "discrete_event",
+    "allow_nebius_jobs": false,
+    "max_concurrent_jobs": 0,
+    "budget_limit_required_for_remote_jobs": true
+  },
+  "evidence": {
+    "llm_can_approve_discovery": false,
+    "require_independent_validation": true,
+    "validation_seed_set_disjoint": true,
+    "retain_failed_runs": true
+  }
+}

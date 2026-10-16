@@ -1,0 +1,350 @@
+{
+  "$defs": {
+    "ExperimentArm": {
+      "additionalProperties": false,
+      "properties": {
+        "arm_id": {
+          "enum": [
+            "control",
+            "treatment"
+          ],
+          "title": "Arm Id",
+          "type": "string"
+        },
+        "scenario_factors": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "maxProperties": 100,
+          "minProperties": 1,
+          "title": "Scenario Factors",
+          "type": "object"
+        },
+        "policy_parameters": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "maxProperties": 100,
+          "minProperties": 1,
+          "title": "Policy Parameters",
+          "type": "object"
+        }
+      },
+      "required": [
+        "arm_id",
+        "scenario_factors",
+        "policy_parameters"
+      ],
+      "title": "ExperimentArm",
+      "type": "object"
+    },
+    "FocusComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "parameter_id": {
+          "title": "Parameter Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "scenario_factor",
+            "policy_parameter"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value_type": {
+          "enum": [
+            "float",
+            "integer"
+          ],
+          "title": "Value Type",
+          "type": "string"
+        },
+        "control_value": {
+          "title": "Control Value",
+          "type": "number"
+        },
+        "treatment_value": {
+          "title": "Treatment Value",
+          "type": "number"
+        },
+        "comparison_rule": {
+          "const": "nearest_distinct_registered_level",
+          "default": "nearest_distinct_registered_level",
+          "title": "Comparison Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "parameter_id",
+        "kind",
+        "unit",
+        "value_type",
+        "control_value",
+        "treatment_value"
+      ],
+      "title": "FocusComparison",
+      "type": "object"
+    },
+    "RegisteredParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "scenario_factor",
+            "policy_parameter"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "parameter_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Parameter Id",
+          "type": "string"
+        },
+        "value_type": {
+          "enum": [
+            "float",
+            "integer"
+          ],
+          "title": "Value Type",
+          "type": "string"
+        },
+        "unit": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "min_value": {
+          "title": "Min Value",
+          "type": "number"
+        },
+        "max_value": {
+          "title": "Max Value",
+          "type": "number"
+        },
+        "registered_values": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Registered Values",
+          "type": "array"
+        },
+        "default_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Value"
+        }
+      },
+      "required": [
+        "kind",
+        "parameter_id",
+        "value_type",
+        "unit",
+        "min_value",
+        "max_value",
+        "registered_values"
+      ],
+      "title": "RegisteredParameter",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Typed DSL output; contains no commands or executable generated code.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "manifest_id": {
+      "pattern": "^exp-[0-9a-f]{24}$",
+      "title": "Manifest Id",
+      "type": "string"
+    },
+    "compiler_version": {
+      "const": "session7.semantic-compiler.v1",
+      "default": "session7.semantic-compiler.v1",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "status": {
+      "const": "compiled_provisional",
+      "default": "compiled_provisional",
+      "title": "Status",
+      "type": "string"
+    },
+    "hypothesis_id": {
+      "title": "Hypothesis Id",
+      "type": "string"
+    },
+    "hypothesis_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Hypothesis Sha256",
+      "type": "string"
+    },
+    "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "scenario_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Scenario Sha256",
+      "type": "string"
+    },
+    "compiler_config_id": {
+      "title": "Compiler Config Id",
+      "type": "string"
+    },
+    "compiler_config_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Compiler Config Sha256",
+      "type": "string"
+    },
+    "evidence_label": {
+      "title": "Evidence Label",
+      "type": "string"
+    },
+    "backend_id": {
+      "enum": [
+        "discrete_event",
+        "surrogate"
+      ],
+      "title": "Backend Id",
+      "type": "string"
+    },
+    "target_metric": {
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "predicted_direction": {
+      "enum": [
+        "increase",
+        "decrease",
+        "no_change",
+        "non_monotonic"
+      ],
+      "title": "Predicted Direction",
+      "type": "string"
+    },
+    "design_kind": {
+      "const": "paired_single_factor",
+      "default": "paired_single_factor",
+      "title": "Design Kind",
+      "type": "string"
+    },
+    "registry": {
+      "items": {
+        "$ref": "#/$defs/RegisteredParameter"
+      },
+      "maxItems": 100,
+      "minItems": 2,
+      "title": "Registry",
+      "type": "array"
+    },
+    "focus": {
+      "$ref": "#/$defs/FocusComparison"
+    },
+    "control": {
+      "$ref": "#/$defs/ExperimentArm"
+    },
+    "treatment": {
+      "$ref": "#/$defs/ExperimentArm"
+    },
+    "interaction_terms": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Interaction Terms",
+      "type": "array"
+    },
+    "horizon_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Horizon Seconds",
+      "type": "number"
+    },
+    "replicates_per_arm": {
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Replicates Per Arm",
+      "type": "integer"
+    },
+    "run_count": {
+      "maximum": 200,
+      "minimum": 2,
+      "title": "Run Count",
+      "type": "integer"
+    },
+    "max_run_count_at_compile": {
+      "maximum": 200,
+      "minimum": 2,
+      "title": "Max Run Count At Compile",
+      "type": "integer"
+    },
+    "seed_allocation": {
+      "const": "deferred_to_session_8_planner",
+      "default": "deferred_to_session_8_planner",
+      "title": "Seed Allocation",
+      "type": "string"
+    },
+    "automatic_execution": {
+      "const": false,
+      "default": false,
+      "title": "Automatic Execution",
+      "type": "boolean"
+    },
+    "promotion_status": {
+      "const": "provisional_not_validated",
+      "default": "provisional_not_validated",
+      "title": "Promotion Status",
+      "type": "string"
+    },
+    "notice": {
+      "const": "Compilation creates a specification only; it does not execute a backend or establish causality.",
+      "default": "Compilation creates a specification only; it does not execute a backend or establish causality.",
+      "title": "Notice",
+      "type": "string"
+    }
+  },
+  "required": [
+    "manifest_id",
+    "hypothesis_id",
+    "hypothesis_sha256",
+    "scenario_id",
+    "scenario_sha256",
+    "compiler_config_id",
+    "compiler_config_sha256",
+    "evidence_label",
+    "backend_id",
+    "target_metric",
+    "predicted_direction",
+    "registry",
+    "focus",
+    "control",
+    "treatment",
+    "horizon_seconds",
+    "replicates_per_arm",
+    "run_count",
+    "max_run_count_at_compile"
+  ],
+  "title": "CompiledExperimentManifest",
+  "type": "object"
+}

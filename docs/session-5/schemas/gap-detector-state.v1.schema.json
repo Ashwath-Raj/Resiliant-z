@@ -1,0 +1,336 @@
+{
+  "$defs": {
+    "GapEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "detector_id": {
+          "minLength": 1,
+          "title": "Detector Id",
+          "type": "string"
+        },
+        "event_type": {
+          "enum": [
+            "gap_candidate",
+            "gap_opened",
+            "gap_persisted",
+            "gap_clear_pending",
+            "gap_cleared",
+            "normal_window",
+            "insufficient_evidence",
+            "out_of_order_window"
+          ],
+          "title": "Event Type",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "candidate",
+            "open",
+            "normal",
+            "cleared",
+            "insufficient_evidence",
+            "out_of_order"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "baseline_id": {
+          "minLength": 1,
+          "title": "Baseline Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "backend_id": {
+          "minLength": 1,
+          "title": "Backend Id",
+          "type": "string"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "metric_name": {
+          "minLength": 1,
+          "title": "Metric Name",
+          "type": "string"
+        },
+        "window_start": {
+          "format": "date-time",
+          "title": "Window Start",
+          "type": "string"
+        },
+        "window_end": {
+          "format": "date-time",
+          "title": "Window End",
+          "type": "string"
+        },
+        "residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Residual"
+        },
+        "standardized_residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standardized Residual"
+        },
+        "absolute_threshold": {
+          "exclusiveMinimum": 0,
+          "title": "Absolute Threshold",
+          "type": "number"
+        },
+        "standardized_threshold": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standardized Threshold"
+        },
+        "consecutive_breach_windows": {
+          "minimum": 0,
+          "title": "Consecutive Breach Windows",
+          "type": "integer"
+        },
+        "consecutive_clear_windows": {
+          "minimum": 0,
+          "title": "Consecutive Clear Windows",
+          "type": "integer"
+        },
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "detector_id",
+        "event_type",
+        "status",
+        "baseline_id",
+        "scenario_id",
+        "backend_id",
+        "run_id",
+        "metric_name",
+        "window_start",
+        "window_end",
+        "absolute_threshold",
+        "consecutive_breach_windows",
+        "consecutive_clear_windows",
+        "active",
+        "reason"
+      ],
+      "title": "GapEvent",
+      "type": "object"
+    },
+    "GapMetricState": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "series_key": {
+          "minLength": 1,
+          "title": "Series Key",
+          "type": "string"
+        },
+        "detector_id": {
+          "minLength": 1,
+          "title": "Detector Id",
+          "type": "string"
+        },
+        "baseline_id": {
+          "minLength": 1,
+          "title": "Baseline Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "backend_id": {
+          "minLength": 1,
+          "title": "Backend Id",
+          "type": "string"
+        },
+        "metric_name": {
+          "minLength": 1,
+          "title": "Metric Name",
+          "type": "string"
+        },
+        "consecutive_breach_windows": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Consecutive Breach Windows",
+          "type": "integer"
+        },
+        "consecutive_clear_windows": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Consecutive Clear Windows",
+          "type": "integer"
+        },
+        "active": {
+          "default": false,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "last_window_start": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Window Start"
+        },
+        "last_window_end": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Window End"
+        },
+        "last_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Run Id"
+        },
+        "last_residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Residual"
+        },
+        "last_standardized_residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Standardized Residual"
+        }
+      },
+      "required": [
+        "series_key",
+        "detector_id",
+        "baseline_id",
+        "scenario_id",
+        "backend_id",
+        "metric_name"
+      ],
+      "title": "GapMetricState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "detector_id": {
+      "minLength": 1,
+      "title": "Detector Id",
+      "type": "string"
+    },
+    "config_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Config Sha256",
+      "type": "string"
+    },
+    "series": {
+      "additionalProperties": {
+        "$ref": "#/$defs/GapMetricState"
+      },
+      "title": "Series",
+      "type": "object"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/GapEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "detector_id",
+    "config_sha256"
+  ],
+  "title": "GapDetectorState",
+  "type": "object"
+}

@@ -1,0 +1,375 @@
+{
+  "$defs": {
+    "AuditEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "pattern": "^run-[0-9a-f]{24}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "discovery",
+            "selection",
+            "validation",
+            "replay"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "arm_id": {
+          "enum": [
+            "control",
+            "treatment"
+          ],
+          "title": "Arm Id",
+          "type": "string"
+        },
+        "replicate_index": {
+          "maximum": 99,
+          "minimum": 0,
+          "title": "Replicate Index",
+          "type": "integer"
+        },
+        "seed": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "not_executed",
+            "failed",
+            "timed_out",
+            "incomplete",
+            "invalid_result",
+            "excluded_non_validation",
+            "missing_metric",
+            "unmeasured_metric",
+            "out_of_range",
+            "wrong_unit",
+            "excluded_unpaired",
+            "included_primary"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "included_in_primary_analysis": {
+          "default": false,
+          "title": "Included In Primary Analysis",
+          "type": "boolean"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "split",
+        "arm_id",
+        "replicate_index",
+        "seed",
+        "status",
+        "reason"
+      ],
+      "title": "AuditEntry",
+      "type": "object"
+    },
+    "PairedDelta": {
+      "additionalProperties": false,
+      "properties": {
+        "split": {
+          "const": "validation",
+          "default": "validation",
+          "title": "Split",
+          "type": "string"
+        },
+        "replicate_index": {
+          "maximum": 99,
+          "minimum": 0,
+          "title": "Replicate Index",
+          "type": "integer"
+        },
+        "seed": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "control_run_id": {
+          "pattern": "^run-[0-9a-f]{24}$",
+          "title": "Control Run Id",
+          "type": "string"
+        },
+        "treatment_run_id": {
+          "pattern": "^run-[0-9a-f]{24}$",
+          "title": "Treatment Run Id",
+          "type": "string"
+        },
+        "control_value": {
+          "title": "Control Value",
+          "type": "number"
+        },
+        "treatment_value": {
+          "title": "Treatment Value",
+          "type": "number"
+        },
+        "effect_treatment_minus_control": {
+          "title": "Effect Treatment Minus Control",
+          "type": "number"
+        },
+        "unit": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "replicate_index",
+        "seed",
+        "control_run_id",
+        "treatment_run_id",
+        "control_value",
+        "treatment_value",
+        "effect_treatment_minus_control",
+        "unit"
+      ],
+      "title": "PairedDelta",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "report_id": {
+      "pattern": "^report-[0-9a-f]{24}$",
+      "title": "Report Id",
+      "type": "string"
+    },
+    "report_status": {
+      "const": "provisional_evidence_report",
+      "default": "provisional_evidence_report",
+      "title": "Report Status",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^plan-[0-9a-f]{24}$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "manifest_id": {
+      "pattern": "^exp-[0-9a-f]{24}$",
+      "title": "Manifest Id",
+      "type": "string"
+    },
+    "source_manifest_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Manifest Sha256",
+      "type": "string"
+    },
+    "analysis_config_id": {
+      "title": "Analysis Config Id",
+      "type": "string"
+    },
+    "analysis_config_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Analysis Config Sha256",
+      "type": "string"
+    },
+    "primary_split": {
+      "const": "validation",
+      "default": "validation",
+      "title": "Primary Split",
+      "type": "string"
+    },
+    "target_metric": {
+      "title": "Target Metric",
+      "type": "string"
+    },
+    "metric_unit": {
+      "title": "Metric Unit",
+      "type": "string"
+    },
+    "predicted_direction": {
+      "enum": [
+        "increase",
+        "decrease",
+        "no_change",
+        "non_monotonic"
+      ],
+      "title": "Predicted Direction",
+      "type": "string"
+    },
+    "planned_validation_runs": {
+      "maximum": 200,
+      "minimum": 0,
+      "title": "Planned Validation Runs",
+      "type": "integer"
+    },
+    "measured_validation_runs": {
+      "maximum": 200,
+      "minimum": 0,
+      "title": "Measured Validation Runs",
+      "type": "integer"
+    },
+    "validation_run_coverage": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Validation Run Coverage",
+      "type": "number"
+    },
+    "pair_count": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Pair Count",
+      "type": "integer"
+    },
+    "mean_paired_effect": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mean Paired Effect"
+    },
+    "sample_sd_paired_effect": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sample Sd Paired Effect"
+    },
+    "confidence_interval_95_low": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence Interval 95 Low"
+    },
+    "confidence_interval_95_high": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence Interval 95 High"
+    },
+    "effect_size_cohens_dz": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Effect Size Cohens Dz"
+    },
+    "decision": {
+      "enum": [
+        "supports_predicted_direction",
+        "contradicts_predicted_direction",
+        "inconclusive",
+        "insufficient_pairs",
+        "unsupported_direction"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "audit_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Audit Counts",
+      "type": "object"
+    },
+    "paired_deltas": {
+      "items": {
+        "$ref": "#/$defs/PairedDelta"
+      },
+      "maxItems": 100,
+      "title": "Paired Deltas",
+      "type": "array"
+    },
+    "audit": {
+      "items": {
+        "$ref": "#/$defs/AuditEntry"
+      },
+      "maxItems": 200,
+      "title": "Audit",
+      "type": "array"
+    },
+    "methods": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Methods",
+      "type": "array"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "report_id",
+    "plan_id",
+    "manifest_id",
+    "source_manifest_sha256",
+    "analysis_config_id",
+    "analysis_config_sha256",
+    "target_metric",
+    "metric_unit",
+    "predicted_direction",
+    "planned_validation_runs",
+    "measured_validation_runs",
+    "validation_run_coverage",
+    "pair_count",
+    "decision",
+    "audit_counts",
+    "paired_deltas",
+    "audit",
+    "methods",
+    "limitations"
+  ],
+  "title": "EvidenceReport",
+  "type": "object"
+}

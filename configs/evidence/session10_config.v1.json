@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "config_id": "session10-validation-evidence-v1",
+  "primary_split": "validation",
+  "expected_metric_unit": "seconds",
+  "metric_min_value": 0.0,
+  "metric_max_value": 3600.0,
+  "minimum_pairs": 3,
+  "minimum_practical_effect": 0.0,
+  "confidence_level": 0.95,
+  "max_plan_bytes": 1048576,
+  "max_receipt_bytes": 16777216,
+  "max_result_bytes": 1048576,
+  "max_runs": 200,
+  "max_receipts": 200
+}

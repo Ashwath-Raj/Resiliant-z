@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "max_hypotheses": {
+      "default": 3,
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Max Hypotheses",
+      "type": "integer"
+    },
+    "max_attempts": {
+      "default": 2,
+      "maximum": 3,
+      "minimum": 1,
+      "title": "Max Attempts",
+      "type": "integer"
+    },
+    "timeout_seconds": {
+      "default": 12.0,
+      "exclusiveMinimum": 0,
+      "maximum": 60,
+      "title": "Timeout Seconds",
+      "type": "number"
+    },
+    "max_response_bytes": {
+      "default": 32768,
+      "maximum": 262144,
+      "minimum": 256,
+      "title": "Max Response Bytes",
+      "type": "integer"
+    },
+    "max_request_bytes": {
+      "default": 32768,
+      "maximum": 131072,
+      "minimum": 256,
+      "title": "Max Request Bytes",
+      "type": "integer"
+    }
+  },
+  "title": "HypothesisGenerationConfig",
+  "type": "object"
+}

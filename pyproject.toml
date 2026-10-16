@@ -29,6 +29,7 @@ dev = [
 [project.scripts]
 resiliant = "resiliant_z.cli:main"
 
+resiliant-stress-test = "resiliant_z.stress_test:main"
 [tool.setuptools]
 package-dir = { "" = "src" }
 include-package-data = true

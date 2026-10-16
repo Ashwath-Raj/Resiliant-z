@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "session6-offline-hypotheses-v1",
+  "notice": "Illustrative synthetic hypotheses only; not calibrated or causal findings.",
+  "hypotheses": [
+    {
+      "schema_version": "1.0.0",
+      "request_id": "TEMPLATE",
+      "hypothesis_id": "HYP-TRAFFIC-QUEUE",
+      "gap_event_id": "TEMPLATE",
+      "scenario_id": "TEMPLATE",
+      "target_metric": "TEMPLATE",
+      "falsifiable_claim": "For {{scenario_id}}, raising traffic_demand to the registered high level increases {{target_metric}} relative to the lower registered level under fixed controls.",
+      "falsification_criterion": "Reject if paired held-out runs do not show a positive change in {{target_metric}} beyond the predeclared tolerance.",
+      "focus_variable_id": "traffic_demand",
+      "predicted_direction": "increase",
+      "predicted_response": "{{target_metric}} is predicted to increase at the high registered traffic-demand level.",
+      "factor_values": {"traffic_demand": 1.05, "priority_ratio": 0.15},
+      "policy_values": {"bypass_ratio": 0.0},
+      "assumptions": [
+        "The current scenario factor registry is the experiment authority.",
+        "All values are illustrative and synthetic, not measured warehouse settings."
+      ],
+      "rationale": "Higher registered task demand can increase queue pressure in a capacity-limited discrete-event model; this is a testable candidate, not a confirmed result.",
+      "confidence": 0.35
+    },
+    {
+      "schema_version": "1.0.0",
+      "request_id": "TEMPLATE",
+      "hypothesis_id": "HYP-BYPASS-QUEUE",
+      "gap_event_id": "TEMPLATE",
+      "scenario_id": "TEMPLATE",
+      "target_metric": "TEMPLATE",
+      "falsifiable_claim": "For {{scenario_id}}, testing the registered 0.15 bypass_ratio under the same workload decreases {{target_metric}} relative to bypass_ratio 0.0.",
+      "falsification_criterion": "Reject if paired runs at bypass_ratio 0.15 fail to reduce {{target_metric}} relative to the 0.0 control by the predeclared tolerance.",
+      "focus_variable_id": "bypass_ratio",
+      "predicted_direction": "decrease",
+      "predicted_response": "{{target_metric}} is predicted to decrease under the registered bypass policy setting.",
+      "factor_values": {"traffic_demand": 1.05, "priority_ratio": 0.15},
+      "policy_values": {"bypass_ratio": 0.15},
+      "assumptions": [
+        "The bypass policy setting is supported by the declared scenario configuration.",
+        "The response must be measured in paired local runs before any interpretation."
+      ],
+      "rationale": "A small registered bypass setting may redistribute congestion, but its effect is unknown and must be falsified using paired local evidence.",
+      "confidence": 0.25
+    }
+  ]
+}

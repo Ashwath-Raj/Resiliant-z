@@ -61,7 +61,9 @@ def _get_parser() -> argparse.ArgumentParser:
     sub.add_parser("doctor", help="check local environment and non-secret configuration state")
     sub.add_parser("models", help="list model IDs visible to your Token Factory API key")
     sub.add_parser("serve", help="start the local dashboard API")
-    imported = sub.add_parser("validate-isaac-csv", help="validate a simulator-host metrics CSV contract")
+    imported = sub.add_parser(
+        "validate-isaac-csv", help="validate a simulator-host metrics CSV contract"
+    )
     imported.add_argument("path", help="path to a CSV exported by the Isaac Sim host runner")
     return parser
 
@@ -123,7 +125,17 @@ def main() -> int:
         counts = {}
         for run in runs:
             counts[run.experiment.stage] = counts.get(run.experiment.stage, 0) + 1
-        print(json.dumps({"csv": str(Path(args.path).resolve()), "rows_validated": len(runs), "stage_counts": counts, "backend_label": "isaac_sim_import (verify host provenance separately)"}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "csv": str(Path(args.path).resolve()),
+                    "rows_validated": len(runs),
+                    "stage_counts": counts,
+                    "backend_label": "isaac_sim_import (verify host provenance separately)",
+                },
+                indent=2,
+            )
+        )
         return 0
     if args.command == "serve":
         import uvicorn
@@ -142,16 +154,23 @@ def main() -> int:
         except Exception as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-        print(json.dumps({
-            "project": summary["project"],
-            "evidence_label": summary["evidence_label"],
-            "backend": summary["backend"],
-            "runs": summary["counts"],
-            "discovery_status": summary["discovery"]["status"],
-            "validation_improvement_fraction": summary["discovery"]["validation_improvement_fraction"],
-            "policy_replay": summary["policy_replay"],
-            "artifacts": str(Path(args.output_dir).resolve()),
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "project": summary["project"],
+                    "evidence_label": summary["evidence_label"],
+                    "backend": summary["backend"],
+                    "runs": summary["counts"],
+                    "discovery_status": summary["discovery"]["status"],
+                    "validation_improvement_fraction": summary["discovery"][
+                        "validation_improvement_fraction"
+                    ],
+                    "policy_replay": summary["policy_replay"],
+                    "artifacts": str(Path(args.output_dir).resolve()),
+                },
+                indent=2,
+            )
+        )
         print("\nRead report: " + str((Path(args.output_dir) / "report.md").resolve()))
         return 0 if summary["discovery"]["status"] == "validated" else 2
     if args.command == "fleet-sensitivity":
@@ -166,15 +185,20 @@ def main() -> int:
         except Exception as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-        print(json.dumps({
-            "project": summary["project"],
-            "evidence_label": summary["evidence_label"],
-            "backend": summary["backend"],
-            "counts": summary["counts"],
-            "detour_cost_levels_seconds": summary["protocol"]["detour_cost_levels_seconds"],
-            "fixed_bypass_ratio": summary["protocol"]["selected_bypass_ratio_held_fixed"],
-            "artifacts": str(Path(args.output_dir).resolve()),
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "project": summary["project"],
+                    "evidence_label": summary["evidence_label"],
+                    "backend": summary["backend"],
+                    "counts": summary["counts"],
+                    "detour_cost_levels_seconds": summary["protocol"]["detour_cost_levels_seconds"],
+                    "fixed_bypass_ratio": summary["protocol"]["selected_bypass_ratio_held_fixed"],
+                    "artifacts": str(Path(args.output_dir).resolve()),
+                },
+                indent=2,
+            )
+        )
         print("\nRead report: " + str((Path(args.output_dir) / "report.md").resolve()))
         return 0
     if args.command == "demo":
@@ -188,16 +212,23 @@ def main() -> int:
         except Exception as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-        print(json.dumps({
-            "project": summary["project"],
-            "evidence_label": summary["evidence_label"],
-            "runs": summary["counts"],
-            "hypothesis_source": summary["hypothesis_generation"]["source"],
-            "discovery_status": summary["discovery"]["status"],
-            "validation_improvement_fraction": summary["discovery"]["validation_improvement_fraction"],
-            "policy_replay": summary["policy_replay"],
-            "artifacts": str(Path(args.output_dir).resolve()),
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "project": summary["project"],
+                    "evidence_label": summary["evidence_label"],
+                    "runs": summary["counts"],
+                    "hypothesis_source": summary["hypothesis_generation"]["source"],
+                    "discovery_status": summary["discovery"]["status"],
+                    "validation_improvement_fraction": summary["discovery"][
+                        "validation_improvement_fraction"
+                    ],
+                    "policy_replay": summary["policy_replay"],
+                    "artifacts": str(Path(args.output_dir).resolve()),
+                },
+                indent=2,
+            )
+        )
         print("\nRead report: " + str((Path(args.output_dir) / "report.md").resolve()))
         return 0 if summary["discovery"]["status"] == "validated" else 2
     return 2

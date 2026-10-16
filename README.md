@@ -12,7 +12,7 @@ This starter repository contains a runnable first vertical slice:
 
 - a deterministic, seeded **synthetic surrogate** for local development and CI;
 - a CPU-only **discrete-event fleet model** with robot availability, shared junction/bypass queues, priority service, seeded arrivals and held-out interaction analysis;
-- a validated experiment-manifest contract and a bounded 2×2 factorial plan;
+- versioned, backward-compatible manifest/run-result contracts with explicit scenario provenance and unmeasured metrics, plus a bounded 2×2 factorial plan;
 - local baseline hypotheses and an optional Nebius Token Factory hypothesis-generation adapter;
 - a main-effects versus interaction-model comparison using NumPy least squares;
 - held-out-seed validation;
@@ -176,3 +176,7 @@ CI runs Ruff and pytest without needing Isaac Sim or Token Factory credentials.
 ```
 
 See [`docs/architecture.md`](docs/architecture.md), [`docs/experiment-contract.md`](docs/experiment-contract.md), and [`docs/isaac-sim-host.md`](docs/isaac-sim-host.md).
+
+## Three-phase RESILIANT implementation program
+
+See [the three-phase implementation plan](docs/THREE_PHASE_IMPLEMENTATION_PLAN.md) and the session-by-session execution matrix in [docs/three-phase-program/docs/SESSION_BY_SESSION_EXECUTION.md](docs/three-phase-program/docs/SESSION_BY_SESSION_EXECUTION.md). This program stops before launching Isaac Sim; see the program documentation for acceptance gates and runtime authorization requirements.

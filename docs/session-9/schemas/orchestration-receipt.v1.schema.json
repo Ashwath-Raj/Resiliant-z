@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resiliant-z.invalid/schemas/orchestration-receipt.v1.schema.json",
+  "title": "RESILIANT-Z Session 9 Execution Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "receipt_id", "run_id", "plan_id", "request_sha256", "executor_kind", "status", "started_at_utc", "ended_at_utc"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "receipt_id": {"type": "string", "pattern": "^rcpt-[0-9a-f]{24}$"},
+    "run_id": {"type": "string", "pattern": "^run-[0-9a-f]{24}$"},
+    "plan_id": {"type": "string", "pattern": "^plan-[0-9a-f]{24}$"},
+    "request_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "executor_kind": {"enum": ["local", "nebius_jobs"]},
+    "status": {"enum": ["succeeded", "failed", "timed_out", "incomplete"]},
+    "started_at_utc": {"type": "string", "format": "date-time"},
+    "ended_at_utc": {"type": "string", "format": "date-time"},
+    "result_location": {"type": ["string", "null"], "maxLength": 2048},
+    "result_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "logs_location": {"type": ["string", "null"], "maxLength": 2048},
+    "remote_job_id": {"type": ["string", "null"], "maxLength": 256},
+    "container_image_digest": {"type": ["string", "null"], "maxLength": 512},
+    "failure_reason": {"type": ["string", "null"], "maxLength": 512}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]},
+      "then": {"required": ["result_location", "result_sha256"], "properties": {"result_location": {"type": "string", "minLength": 1}, "result_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "failure_reason": {"type": "null"}}},
+      "else": {"required": ["failure_reason"], "properties": {"failure_reason": {"type": "string", "minLength": 1}}}
+    }
+  ]
+}
